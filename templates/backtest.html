@@ -1,0 +1,691 @@
+{% extends "base.html" %}
+
+{% block title %}Backtest - Forex Trading Bot{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-12">
+        <h1 class="h3 mb-0">
+            <i class="fas fa-history me-2"></i>Strategy Backtesting
+        </h1>
+        <p class="text-muted">Test your trading strategies against historical data</p>
+    </div>
+</div>
+
+<!-- Backtest Configuration -->
+<div class="row mb-4">
+    <div class="col-lg-4 mb-4">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">
+                    <i class="fas fa-cog me-2"></i>Backtest Configuration
+                </h5>
+            </div>
+            <div class="card-body">
+                <form id="backtestForm">
+                    <div class="mb-3">
+                        <label for="strategy" class="form-label">Strategy</label>
+                        <select class="form-select" id="strategy" required>
+                            <option value="">Select Strategy</option>
+                            <option value="sma_crossover">SMA Crossover</option>
+                            <option value="rsi_scalping">RSI Scalping</option>
+                            <option value="sma_rsi_combo">SMA + RSI Combo</option>
+                            <option value="bollinger_bands">Bollinger Bands</option>
+                            <option value="ema_crossover">EMA Crossover</option>
+                        </select>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="symbol" class="form-label">Symbol</label>
+                        <select class="form-select" id="symbol" required>
+                            <option value="">Select Symbol</option>
+                            <option value="EURUSDm">EUR/USD</option>
+                            <option value="GBPUSDm">GBP/USD</option>
+                            <option value="USDJPYm">USD/JPY</option>
+                            <option value="XAUUSDm">XAU/USD (Gold)</option>
+                            <option value="EURGBPm">EUR/GBP</option>
+                            <option value="BTCUSDm">BTC/USD</option>
+                            <option value="ETHUSDm">ETH/USD</option>
+                        </select>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="timeframe" class="form-label">Timeframe</label>
+                        <select class="form-select" id="timeframe" required>
+                            <option value="M5">5 Minutes</option>
+                            <option value="M15">15 Minutes</option>
+                            <option value="M30" selected>30 Minutes</option>
+                            <option value="H1">1 Hour</option>
+                            <option value="H4">4 Hours</option>
+                            <option value="D1">Daily</option>
+                        </select>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="startDate" class="form-label">Start Date</label>
+                        <input type="date" class="form-control" id="startDate" required>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="endDate" class="form-label">End Date</label>
+                        <input type="date" class="form-control" id="endDate" required>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="initialBalance" class="form-label">Initial Balance ($)</label>
+                        <input type="number" class="form-control" id="initialBalance" value="10000" min="1000" step="1000" required>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="riskPercent" class="form-label">Risk per Trade (%)</label>
+                        <input type="number" class="form-control" id="riskPercent" value="2" min="0.1" max="10" step="0.1" required>
+                    </div>
+                    
+                    <button type="submit" class="btn btn-primary w-100" id="runBacktestBtn">
+                        <i class="fas fa-play me-2"></i>Run Backtest
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Backtest Status -->
+    <div class="col-lg-8 mb-4">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">
+                    <i class="fas fa-info-circle me-2"></i>Backtest Status
+                </h5>
+            </div>
+            <div class="card-body">
+                <div id="backtestStatus" class="text-center py-4">
+                    <i class="fas fa-chart-line fa-3x text-muted mb-3"></i>
+                    <h5 class="text-muted">Ready to Run Backtest</h5>
+                    <p class="text-muted">Configure your parameters and click "Run Backtest" to begin</p>
+                </div>
+                
+                <div id="backtestProgress" class="d-none">
+                    <div class="d-flex align-items-center mb-3">
+                        <div class="spinner-border spinner-border-sm me-3" role="status"></div>
+                        <div>
+                            <h6 class="mb-1">Running Backtest...</h6>
+                            <small class="text-muted" id="progressText">Initializing...</small>
+                        </div>
+                    </div>
+                    <div class="progress">
+                        <div class="progress-bar" role="progressbar" style="width: 0%" id="progressBar"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Backtest Results -->
+<div id="backtestResults" class="d-none">
+    <!-- Performance Summary -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">
+                        <i class="fas fa-trophy me-2"></i>Backtest Results
+                    </h5>
+                    <button class="btn btn-outline-secondary btn-sm" id="saveBacktestBtn">
+                        <i class="fas fa-save me-1"></i>Save Results
+                    </button>
+                </div>
+                <div class="card-body">
+                    <div class="row text-center">
+                        <div class="col-lg-2 col-md-4 col-6 mb-3">
+                            <div class="border-end">
+                                <h4 class="mb-1" id="resultTotalReturn">+0.00%</h4>
+                                <small class="text-muted">Total Return</small>
+                            </div>
+                        </div>
+                        <div class="col-lg-2 col-md-4 col-6 mb-3">
+                            <div class="border-end">
+                                <h4 class="mb-1" id="resultTotalTrades">0</h4>
+                                <small class="text-muted">Total Trades</small>
+                            </div>
+                        </div>
+                        <div class="col-lg-2 col-md-4 col-6 mb-3">
+                            <div class="border-end">
+                                <h4 class="mb-1" id="resultWinRate">0%</h4>
+                                <small class="text-muted">Win Rate</small>
+                            </div>
+                        </div>
+                        <div class="col-lg-2 col-md-4 col-6 mb-3">
+                            <div class="border-end">
+                                <h4 class="mb-1" id="resultProfitFactor">0.00</h4>
+                                <small class="text-muted">Profit Factor</small>
+                            </div>
+                        </div>
+                        <div class="col-lg-2 col-md-4 col-6 mb-3">
+                            <div class="border-end">
+                                <h4 class="mb-1" id="resultMaxDrawdown">0.00%</h4>
+                                <small class="text-muted">Max Drawdown</small>
+                            </div>
+                        </div>
+                        <div class="col-lg-2 col-md-4 col-6 mb-3">
+                            <h4 class="mb-1" id="resultSharpe">0.00</h4>
+                            <small class="text-muted">Sharpe Ratio</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Charts Row -->
+    <div class="row mb-4">
+        <!-- Equity Curve -->
+        <div class="col-lg-8 mb-4">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="fas fa-chart-line me-2"></i>Equity Curve
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <canvas id="backtestEquityChart" height="100"></canvas>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Monthly Returns -->
+        <div class="col-lg-4 mb-4">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="fas fa-calendar me-2"></i>Monthly Returns
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <canvas id="monthlyReturnsChart"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Detailed Analysis -->
+    <div class="row mb-4">
+        <div class="col-lg-6 mb-4">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="fas fa-chart-bar me-2"></i>Trade Distribution
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <canvas id="tradeDistributionChart"></canvas>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-lg-6 mb-4">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="fas fa-chart-area me-2"></i>Drawdown Analysis
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <canvas id="drawdownChart"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Trade Details -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">
+                        <i class="fas fa-list me-2"></i>Trade Details
+                    </h5>
+                    <button class="btn btn-outline-secondary btn-sm" id="exportBacktestTrades">
+                        <i class="fas fa-download me-1"></i>Export CSV
+                    </button>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-sm table-hover">
+                            <thead>
+                                <tr>
+                                    <th>#</th>
+                                    <th>Entry Date</th>
+                                    <th>Exit Date</th>
+                                    <th>Type</th>
+                                    <th>Volume</th>
+                                    <th>Entry Price</th>
+                                    <th>Exit Price</th>
+                                    <th>Profit</th>
+                                    <th>Balance</th>
+                                </tr>
+                            </thead>
+                            <tbody id="backtestTradesTable">
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Historical Results -->
+<div class="row mt-5">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h5 class="mb-0">
+                    <i class="fas fa-history me-2"></i>Previous Backtest Results
+                </h5>
+                <button class="btn btn-outline-secondary btn-sm" id="refreshHistoryBtn">
+                    <i class="fas fa-sync-alt me-1"></i>Refresh
+                </button>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>Date</th>
+                                <th>Strategy</th>
+                                <th>Symbol</th>
+                                <th>Timeframe</th>
+                                <th>Period</th>
+                                <th>Return</th>
+                                <th>Trades</th>
+                                <th>Win Rate</th>
+                                <th>Max DD</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="historyTable">
+                            <tr>
+                                <td colspan="10" class="text-center py-4">
+                                    <i class="fas fa-spinner fa-spin me-2"></i>Loading previous results...
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Set default dates
+    const today = new Date();
+    const sixMonthsAgo = new Date(today);
+    sixMonthsAgo.setMonth(today.getMonth() - 6);
+    
+    document.getElementById('endDate').value = today.toISOString().split('T')[0];
+    document.getElementById('startDate').value = sixMonthsAgo.toISOString().split('T')[0];
+    
+    // Load previous backtest results
+    loadBacktestHistory();
+    
+    // Form submission
+    document.getElementById('backtestForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+        runBacktest();
+    });
+    
+    // Refresh history
+    document.getElementById('refreshHistoryBtn').addEventListener('click', loadBacktestHistory);
+});
+
+function runBacktest() {
+    const formData = {
+        strategy: document.getElementById('strategy').value,
+        symbol: document.getElementById('symbol').value,
+        timeframe: document.getElementById('timeframe').value,
+        start_date: document.getElementById('startDate').value,
+        end_date: document.getElementById('endDate').value,
+        initial_balance: parseFloat(document.getElementById('initialBalance').value),
+        risk_percent: parseFloat(document.getElementById('riskPercent').value)
+    };
+    
+    // Show progress
+    document.getElementById('backtestStatus').classList.add('d-none');
+    document.getElementById('backtestProgress').classList.remove('d-none');
+    document.getElementById('backtestResults').classList.add('d-none');
+    
+    // Disable form
+    document.getElementById('runBacktestBtn').disabled = true;
+    document.getElementById('runBacktestBtn').innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Running...';
+    
+    // Simulate progress
+    let progress = 0;
+    const progressInterval = setInterval(() => {
+        progress += Math.random() * 15;
+        if (progress > 95) progress = 95;
+        
+        document.getElementById('progressBar').style.width = progress + '%';
+        
+        if (progress < 30) {
+            document.getElementById('progressText').textContent = 'Loading historical data...';
+        } else if (progress < 60) {
+            document.getElementById('progressText').textContent = 'Running strategy simulation...';
+        } else if (progress < 90) {
+            document.getElementById('progressText').textContent = 'Calculating performance metrics...';
+        } else {
+            document.getElementById('progressText').textContent = 'Finalizing results...';
+        }
+    }, 200);
+    
+    // Run actual backtest
+    fetch('/api/backtest', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(formData)
+    })
+    .then(response => response.json())
+    .then(data => {
+        clearInterval(progressInterval);
+        document.getElementById('progressBar').style.width = '100%';
+        document.getElementById('progressText').textContent = 'Complete!';
+        
+        setTimeout(() => {
+            showBacktestResults(data);
+        }, 500);
+    })
+    .catch(error => {
+        clearInterval(progressInterval);
+        console.error('Backtest error:', error);
+        
+        document.getElementById('backtestProgress').classList.add('d-none');
+        document.getElementById('backtestStatus').classList.remove('d-none');
+        document.getElementById('backtestStatus').innerHTML = `
+            <i class="fas fa-exclamation-triangle fa-3x text-danger mb-3"></i>
+            <h5 class="text-danger">Backtest Failed</h5>
+            <p class="text-muted">${error.message || 'An error occurred while running the backtest'}</p>
+        `;
+    })
+    .finally(() => {
+        // Re-enable form
+        document.getElementById('runBacktestBtn').disabled = false;
+        document.getElementById('runBacktestBtn').innerHTML = '<i class="fas fa-play me-2"></i>Run Backtest';
+    });
+}
+
+function showBacktestResults(data) {
+    // Hide progress, show results
+    document.getElementById('backtestProgress').classList.add('d-none');
+    document.getElementById('backtestResults').classList.remove('d-none');
+    
+    // Update summary metrics
+    document.getElementById('resultTotalReturn').textContent = `${data.total_return >= 0 ? '+' : ''}${data.total_return}%`;
+    document.getElementById('resultTotalReturn').className = `mb-1 ${data.total_return >= 0 ? 'text-success' : 'text-danger'}`;
+    
+    document.getElementById('resultTotalTrades').textContent = data.total_trades;
+    document.getElementById('resultWinRate').textContent = `${data.win_rate}%`;
+    document.getElementById('resultProfitFactor').textContent = data.profit_factor;
+    document.getElementById('resultMaxDrawdown').textContent = `${data.max_drawdown}%`;
+    document.getElementById('resultSharpe').textContent = data.sharpe_ratio;
+    
+    // Create charts
+    createEquityCurveChart(data.balance_history);
+    createMonthlyReturnsChart(data.balance_history);
+    createTradeDistributionChart(data.trades);
+    createDrawdownChart(data.balance_history);
+    
+    // Update trades table
+    updateBacktestTradesTable(data.trades);
+    
+    // Scroll to results
+    document.getElementById('backtestResults').scrollIntoView({ behavior: 'smooth' });
+    
+    // Refresh history
+    loadBacktestHistory();
+}
+
+function createEquityCurveChart(balanceHistory) {
+    const ctx = document.getElementById('backtestEquityChart').getContext('2d');
+    
+    if (window.backtestEquityChart) {
+        window.backtestEquityChart.destroy();
+    }
+    
+    window.backtestEquityChart = new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: balanceHistory.map(item => new Date(item.time).toLocaleDateString()),
+            datasets: [{
+                label: 'Account Balance',
+                data: balanceHistory.map(item => item.balance),
+                borderColor: 'rgb(75, 192, 192)',
+                backgroundColor: 'rgba(75, 192, 192, 0.1)',
+                tension: 0.4,
+                fill: true
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+                y: {
+                    title: {
+                        display: true,
+                        text: 'Balance ($)'
+                    }
+                }
+            },
+            plugins: {
+                legend: {
+                    display: false
+                }
+            }
+        }
+    });
+}
+
+function createMonthlyReturnsChart(balanceHistory) {
+    const ctx = document.getElementById('monthlyReturnsChart').getContext('2d');
+    
+    // Calculate monthly returns (placeholder)
+    const monthlyReturns = [2.5, -1.2, 4.8, 0.3, -2.1, 3.7];
+    const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'];
+    
+    new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: months,
+            datasets: [{
+                label: 'Monthly Return (%)',
+                data: monthlyReturns,
+                backgroundColor: monthlyReturns.map(val => val >= 0 ? 'rgba(34, 197, 94, 0.8)' : 'rgba(239, 68, 68, 0.8)')
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    display: false
+                }
+            }
+        }
+    });
+}
+
+function createTradeDistributionChart(trades) {
+    const ctx = document.getElementById('tradeDistributionChart').getContext('2d');
+    
+    const winningTrades = trades.filter(t => t.profit > 0).length;
+    const losingTrades = trades.filter(t => t.profit < 0).length;
+    const breakeven = trades.length - winningTrades - losingTrades;
+    
+    new Chart(ctx, {
+        type: 'doughnut',
+        data: {
+            labels: ['Winning Trades', 'Losing Trades', 'Breakeven'],
+            datasets: [{
+                data: [winningTrades, losingTrades, breakeven],
+                backgroundColor: [
+                    'rgba(34, 197, 94, 0.8)',
+                    'rgba(239, 68, 68, 0.8)',
+                    'rgba(156, 163, 175, 0.8)'
+                ]
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    position: 'bottom'
+                }
+            }
+        }
+    });
+}
+
+function createDrawdownChart(balanceHistory) {
+    const ctx = document.getElementById('drawdownChart').getContext('2d');
+    
+    // Calculate drawdown (simplified)
+    let peak = balanceHistory[0].balance;
+    const drawdowns = balanceHistory.map(item => {
+        if (item.balance > peak) peak = item.balance;
+        return ((peak - item.balance) / peak * -100);
+    });
+    
+    new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: balanceHistory.map(item => new Date(item.time).toLocaleDateString()),
+            datasets: [{
+                label: 'Drawdown %',
+                data: drawdowns,
+                borderColor: 'rgb(239, 68, 68)',
+                backgroundColor: 'rgba(239, 68, 68, 0.1)',
+                tension: 0.4,
+                fill: true
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+                y: {
+                    title: {
+                        display: true,
+                        text: 'Drawdown (%)'
+                    },
+                    reverse: true
+                }
+            },
+            plugins: {
+                legend: {
+                    display: false
+                }
+            }
+        }
+    });
+}
+
+function updateBacktestTradesTable(trades) {
+    const tbody = document.getElementById('backtestTradesTable');
+    
+    tbody.innerHTML = trades.map((trade, index) => {
+        const entryDate = new Date(trade.open_time).toLocaleDateString();
+        const exitDate = trade.close_time ? new Date(trade.close_time).toLocaleDateString() : '-';
+        const profitClass = trade.profit >= 0 ? 'text-success' : 'text-danger';
+        
+        return `
+            <tr>
+                <td>${index + 1}</td>
+                <td>${entryDate}</td>
+                <td>${exitDate}</td>
+                <td>
+                    <span class="badge ${trade.type === 'buy' ? 'bg-success' : 'bg-danger'}">
+                        ${trade.type.toUpperCase()}
+                    </span>
+                </td>
+                <td>${trade.volume}</td>
+                <td>${trade.entry_price.toFixed(5)}</td>
+                <td>${trade.exit_price ? trade.exit_price.toFixed(5) : '-'}</td>
+                <td class="${profitClass}">$${trade.profit.toFixed(2)}</td>
+                <td>$${trade.balance_after.toFixed(2)}</td>
+            </tr>
+        `;
+    }).join('');
+}
+
+function loadBacktestHistory() {
+    fetch('/api/backtest/results')
+        .then(response => response.json())
+        .then(data => {
+            updateHistoryTable(data);
+        })
+        .catch(error => {
+            console.error('Error loading backtest history:', error);
+            document.getElementById('historyTable').innerHTML = `
+                <tr>
+                    <td colspan="10" class="text-center py-4 text-danger">
+                        <i class="fas fa-exclamation-triangle me-2"></i>Error loading history
+                    </td>
+                </tr>
+            `;
+        });
+}
+
+function updateHistoryTable(results) {
+    const tbody = document.getElementById('historyTable');
+    
+    if (!results || results.length === 0) {
+        tbody.innerHTML = `
+            <tr>
+                <td colspan="10" class="text-center py-4 text-muted">
+                    <i class="fas fa-inbox me-2"></i>No previous backtest results found
+                </td>
+            </tr>
+        `;
+        return;
+    }
+    
+    tbody.innerHTML = results.map(result => {
+        const date = new Date(result.created_at).toLocaleDateString();
+        const period = `${new Date(result.start_date).toLocaleDateString()} - ${new Date(result.end_date).toLocaleDateString()}`;
+        const returnClass = result.return_pct >= 0 ? 'text-success' : 'text-danger';
+        
+        return `
+            <tr>
+                <td>${date}</td>
+                <td><strong>${result.strategy_name}</strong></td>
+                <td>${result.symbol}</td>
+                <td>${result.timeframe}</td>
+                <td class="text-muted small">${period}</td>
+                <td class="${returnClass}">
+                    <strong>${result.return_pct >= 0 ? '+' : ''}${result.return_pct.toFixed(2)}%</strong>
+                </td>
+                <td>${result.total_trades}</td>
+                <td>${((result.winning_trades / result.total_trades) * 100).toFixed(1)}%</td>
+                <td>${result.max_drawdown.toFixed(2)}%</td>
+                <td>
+                    <button class="btn btn-outline-secondary btn-sm" onclick="viewBacktestDetails(${result.id})">
+                        <i class="fas fa-eye me-1"></i>View
+                    </button>
+                </td>
+            </tr>
+        `;
+    }).join('');
+}
+
+function viewBacktestDetails(id) {
+    // Placeholder for viewing detailed backtest results
+    alert(`View details for backtest ${id} - Feature coming soon`);
+}
+</script>
+{% endblock %}

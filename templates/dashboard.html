@@ -1,0 +1,456 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard - Forex Trading Bot{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-12">
+        <h1 class="h3 mb-0">
+            <i class="fas fa-tachometer-alt me-2"></i>Trading Dashboard
+        </h1>
+        <p class="text-muted">Real-time trading performance and account monitoring</p>
+    </div>
+</div>
+
+<!-- Account Summary Cards -->
+<div class="row mb-4" id="accountSummary">
+    <div class="col-md-3 mb-3">
+        <div class="card">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h6 class="card-title text-muted mb-1">Total Balance</h6>
+                        <h4 class="mb-0" id="totalBalance">
+                            <i class="fas fa-spinner fa-spin"></i>
+                        </h4>
+                    </div>
+                    <div class="text-info">
+                        <i class="fas fa-wallet fa-2x"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-3 mb-3">
+        <div class="card">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h6 class="card-title text-muted mb-1">Total Equity</h6>
+                        <h4 class="mb-0" id="totalEquity">
+                            <i class="fas fa-spinner fa-spin"></i>
+                        </h4>
+                    </div>
+                    <div class="text-warning">
+                        <i class="fas fa-chart-line fa-2x"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-3 mb-3">
+        <div class="card">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h6 class="card-title text-muted mb-1">Free Margin</h6>
+                        <h4 class="mb-0" id="freeMargin">
+                            <i class="fas fa-spinner fa-spin"></i>
+                        </h4>
+                    </div>
+                    <div class="text-success">
+                        <i class="fas fa-coins fa-2x"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-3 mb-3">
+        <div class="card">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h6 class="card-title text-muted mb-1">Open Positions</h6>
+                        <h4 class="mb-0" id="openPositions">
+                            <i class="fas fa-spinner fa-spin"></i>
+                        </h4>
+                    </div>
+                    <div class="text-primary">
+                        <i class="fas fa-chart-bar fa-2x"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Account Details and Live Positions -->
+<div class="row mb-4">
+    <!-- Account Information -->
+    <div class="col-lg-4 mb-4">
+        <div class="card h-100">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h5 class="mb-0">
+                    <i class="fas fa-user-circle me-2"></i>Account Information
+                </h5>
+                <span class="badge bg-secondary" id="lastUpdate">Never</span>
+            </div>
+            <div class="card-body">
+                <div id="accountInfo">
+                    <div class="text-center py-4">
+                        <i class="fas fa-spinner fa-spin fa-2x text-muted"></i>
+                        <p class="text-muted mt-2">Loading account information...</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Quick Stats -->
+    <div class="col-lg-8 mb-4">
+        <div class="card h-100">
+            <div class="card-header">
+                <h5 class="mb-0">
+                    <i class="fas fa-chart-pie me-2"></i>Today's Performance
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="row text-center">
+                    <div class="col-4">
+                        <div class="border-end">
+                            <h3 class="text-success mb-1" id="todayProfit">$0.00</h3>
+                            <small class="text-muted">Today's P&L</small>
+                        </div>
+                    </div>
+                    <div class="col-4">
+                        <div class="border-end">
+                            <h3 class="text-info mb-1" id="todayTrades">0</h3>
+                            <small class="text-muted">Trades Today</small>
+                        </div>
+                    </div>
+                    <div class="col-4">
+                        <h3 class="text-warning mb-1" id="winRate">0%</h3>
+                        <small class="text-muted">Win Rate</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Live Open Positions -->
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h5 class="mb-0">
+                    <i class="fas fa-list-alt me-2"></i>Live Open Positions
+                </h5>
+                <button class="btn btn-outline-secondary btn-sm" id="refreshPositions">
+                    <i class="fas fa-sync-alt me-1"></i>Refresh
+                </button>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-hover" id="positionsTable">
+                        <thead>
+                            <tr>
+                                <th>Ticket</th>
+                                <th>Symbol</th>
+                                <th>Type</th>
+                                <th>Volume</th>
+                                <th>Open Price</th>
+                                <th>Current Price</th>
+                                <th>S/L</th>
+                                <th>T/P</th>
+                                <th>Profit</th>
+                                <th>Time</th>
+                            </tr>
+                        </thead>
+                        <tbody id="positionsTableBody">
+                            <tr>
+                                <td colspan="10" class="text-center py-4">
+                                    <i class="fas fa-spinner fa-spin me-2"></i>Loading positions...
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                
+                <div id="noPositions" class="text-center py-4 d-none">
+                    <i class="fas fa-inbox fa-3x text-muted mb-3"></i>
+                    <h5 class="text-muted">No Open Positions</h5>
+                    <p class="text-muted">When the bot opens new trades, they will appear here.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Live Trading Log -->
+<div class="row">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h5 class="mb-0">
+                    <i class="fas fa-terminal me-2"></i>Live Trading Log
+                </h5>
+                <div class="btn-group" role="group">
+                    <button class="btn btn-outline-secondary btn-sm" id="clearLog">
+                        <i class="fas fa-trash me-1"></i>Clear
+                    </button>
+                    <button class="btn btn-outline-secondary btn-sm" id="toggleAutoScroll">
+                        <i class="fas fa-arrow-down me-1"></i>Auto-scroll
+                    </button>
+                </div>
+            </div>
+            <div class="card-body p-0">
+                <div id="tradingLog" class="bg-dark text-light p-3" style="height: 400px; overflow-y: auto; font-family: 'Consolas', 'Monaco', monospace; font-size: 0.875rem;">
+                    <div class="text-center py-4">
+                        <i class="fas fa-spinner fa-spin me-2"></i>Connecting to live log stream...
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Live Activity Feed -->
+<div class="position-fixed bottom-0 end-0 p-3" style="z-index: 1050;">
+    <div id="liveActivityFeed"></div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+// Dashboard-specific JavaScript
+document.addEventListener('DOMContentLoaded', function() {
+    // Initialize dashboard
+    initializeDashboard();
+    
+    // Set up refresh handlers
+    document.getElementById('refreshPositions').addEventListener('click', function() {
+        this.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i>Refreshing...';
+        refreshPositions();
+        setTimeout(() => {
+            this.innerHTML = '<i class="fas fa-sync-alt me-1"></i>Refresh';
+        }, 1000);
+    });
+    
+    // Clear log handler
+    document.getElementById('clearLog').addEventListener('click', function() {
+        document.getElementById('tradingLog').innerHTML = '<div class="text-muted">Log cleared</div>';
+    });
+    
+    // Auto-scroll toggle
+    let autoScroll = true;
+    document.getElementById('toggleAutoScroll').addEventListener('click', function() {
+        autoScroll = !autoScroll;
+        this.innerHTML = autoScroll ? 
+            '<i class="fas fa-arrow-down me-1"></i>Auto-scroll' : 
+            '<i class="fas fa-pause me-1"></i>Paused';
+        this.classList.toggle('active', autoScroll);
+    });
+});
+
+function initializeDashboard() {
+    // Load initial data
+    loadAccountSummary();
+    loadOpenPositions();
+    loadTodayStats();
+    
+    // Set up periodic updates
+    setInterval(loadAccountSummary, 5000);  // Every 5 seconds
+    setInterval(loadOpenPositions, 10000);  // Every 10 seconds
+    setInterval(loadTodayStats, 30000);     // Every 30 seconds
+}
+
+function loadAccountSummary() {
+    fetch('/api/accounts')
+        .then(response => response.json())
+        .then(accounts => {
+            updateAccountSummary(accounts);
+            updateAccountInfo(accounts[0]); // Primary account
+        })
+        .catch(error => {
+            console.error('Error loading account summary:', error);
+        });
+}
+
+function updateAccountSummary(accounts) {
+    const totalBalance = accounts.reduce((sum, acc) => sum + (acc.balance || 0), 0);
+    const totalEquity = accounts.reduce((sum, acc) => sum + (acc.equity || 0), 0);
+    const totalFreeMargin = accounts.reduce((sum, acc) => sum + (acc.margin_free || 0), 0);
+    
+    document.getElementById('totalBalance').innerHTML = `$${totalBalance.toFixed(2)}`;
+    document.getElementById('totalEquity').innerHTML = `$${totalEquity.toFixed(2)}`;
+    document.getElementById('freeMargin').innerHTML = `$${totalFreeMargin.toFixed(2)}`;
+    
+    // Update last update time
+    document.getElementById('lastUpdate').textContent = new Date().toLocaleTimeString();
+}
+
+function updateAccountInfo(account) {
+    if (!account) return;
+    
+    const accountInfoDiv = document.getElementById('accountInfo');
+    accountInfoDiv.innerHTML = `
+        <div class="row g-3">
+            <div class="col-6">
+                <strong>Login:</strong><br>
+                <span class="text-muted">${account.login}</span>
+            </div>
+            <div class="col-6">
+                <strong>Server:</strong><br>
+                <span class="text-muted">${account.server}</span>
+            </div>
+            <div class="col-6">
+                <strong>Currency:</strong><br>
+                <span class="text-muted">${account.currency}</span>
+            </div>
+            <div class="col-6">
+                <strong>Status:</strong><br>
+                <span class="badge ${account.enabled ? 'bg-success' : 'bg-secondary'}">
+                    ${account.enabled ? 'Active' : 'Disabled'}
+                </span>
+            </div>
+        </div>
+    `;
+}
+
+function loadOpenPositions() {
+    // This would typically fetch from an API endpoint
+    // For now, we'll use WebSocket data when available
+    const tbody = document.getElementById('positionsTableBody');
+    const noPositions = document.getElementById('noPositions');
+    
+    // Show loading state
+    tbody.innerHTML = `
+        <tr>
+            <td colspan="10" class="text-center py-3">
+                <i class="fas fa-spinner fa-spin me-2"></i>Loading positions...
+            </td>
+        </tr>
+    `;
+}
+
+function updatePositionsTable(positions) {
+    const tbody = document.getElementById('positionsTableBody');
+    const noPositions = document.getElementById('noPositions');
+    const openPositionsCard = document.getElementById('openPositions');
+    
+    if (!positions || positions.length === 0) {
+        tbody.innerHTML = '';
+        noPositions.classList.remove('d-none');
+        openPositionsCard.textContent = '0';
+        return;
+    }
+    
+    noPositions.classList.add('d-none');
+    openPositionsCard.textContent = positions.length;
+    
+    tbody.innerHTML = positions.map(pos => `
+        <tr>
+            <td><code>${pos.ticket}</code></td>
+            <td><strong>${pos.symbol}</strong></td>
+            <td>
+                <span class="badge ${pos.type === 'BUY' ? 'bg-success' : 'bg-danger'}">
+                    ${pos.type}
+                </span>
+            </td>
+            <td>${pos.volume}</td>
+            <td>${pos.price_open.toFixed(5)}</td>
+            <td>${pos.price_current.toFixed(5)}</td>
+            <td>${pos.sl ? pos.sl.toFixed(5) : '-'}</td>
+            <td>${pos.tp ? pos.tp.toFixed(5) : '-'}</td>
+            <td class="${pos.profit >= 0 ? 'text-success' : 'text-danger'}">
+                <strong>$${pos.profit.toFixed(2)}</strong>
+            </td>
+            <td class="text-muted small">
+                ${pos.time ? new Date(pos.time).toLocaleTimeString() : '-'}
+            </td>
+        </tr>
+    `).join('');
+}
+
+function loadTodayStats() {
+    fetch('/api/analytics/summary')
+        .then(response => response.json())
+        .then(data => {
+            document.getElementById('todayProfit').textContent = `$${data.total_profit.toFixed(2)}`;
+            document.getElementById('todayProfit').className = data.total_profit >= 0 ? 'text-success mb-1' : 'text-danger mb-1';
+            
+            document.getElementById('todayTrades').textContent = data.total_trades;
+            document.getElementById('winRate').textContent = `${data.win_rate}%`;
+        })
+        .catch(error => {
+            console.error('Error loading today stats:', error);
+        });
+}
+
+function refreshPositions() {
+    loadOpenPositions();
+}
+
+function addLogEntry(message, level = 'info') {
+    const logDiv = document.getElementById('tradingLog');
+    const timestamp = new Date().toLocaleTimeString();
+    const levelClass = {
+        'info': 'text-info',
+        'warning': 'text-warning',
+        'error': 'text-danger',
+        'success': 'text-success'
+    }[level] || 'text-light';
+    
+    const logEntry = document.createElement('div');
+    logEntry.innerHTML = `
+        <span class="text-muted">[${timestamp}]</span>
+        <span class="${levelClass}">${message}</span>
+    `;
+    
+    logDiv.appendChild(logEntry);
+    
+    // Auto-scroll if enabled
+    if (document.getElementById('toggleAutoScroll').classList.contains('active') !== false) {
+        logDiv.scrollTop = logDiv.scrollHeight;
+    }
+    
+    // Limit log entries
+    while (logDiv.children.length > 500) {
+        logDiv.removeChild(logDiv.firstChild);
+    }
+}
+
+function showLiveActivity(message, type = 'info') {
+    const feedDiv = document.getElementById('liveActivityFeed');
+    
+    const alertTypes = {
+        'trade_opened': 'success',
+        'trade_closed': 'info', 
+        'error': 'danger',
+        'info': 'info'
+    };
+    
+    const alertClass = alertTypes[type] || 'info';
+    
+    const alert = document.createElement('div');
+    alert.className = `alert alert-${alertClass} alert-dismissible fade show`;
+    alert.innerHTML = `
+        ${message}
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    `;
+    
+    feedDiv.appendChild(alert);
+    
+    // Auto-remove after 5 seconds
+    setTimeout(() => {
+        if (alert.parentNode) {
+            alert.remove();
+        }
+    }, 5000);
+}
+</script>
+{% endblock %}

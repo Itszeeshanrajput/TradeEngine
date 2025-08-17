@@ -1,0 +1,60 @@
+{
+  "accounts": [
+    {
+      "name": "Primary Demo Account",
+      "login": 248388896,
+      "password": "@Zeeshan786",
+      "server": "Exness-MT5Trial",
+      "symbols": ["EURUSDm", "GBPUSDm", "XAUUSDm", "EURGBPm", "USDJPYm"],
+      "risk_percent": 2.0,
+      "max_volume": 0.2,
+      "strategy_name": "sma_rsi_combo",
+      "enabled": true,
+      "max_positions_per_symbol": 1,
+      "max_total_positions": 3,
+      "daily_loss_limit": 5.0,
+      "trailing_stop_pips": 25,
+      "breakeven_pips": 20
+    },
+    {
+      "name": "Scalping Account",
+      "login": 248388896,
+      "password": "@Zeeshan786",
+      "server": "Exness-MT5Trial",
+      "symbols": ["EURUSDm", "GBPUSDm", "XAUUSDm", "EURGBPm", "USDJPYm", "ADAUSDm", "BTCUSDm", "ETHUSDm", "SOLUSDm", "XRPUSDm", "LINKUSDm", "1INCHUSDm", "BNBUSDm"],
+      "risk_percent": 1.0,
+      "max_volume": 0.1,
+      "strategy_name": "rsi_scalping",
+      "enabled": true,
+      "max_positions_per_symbol": 2,
+      "max_total_positions": 5,
+      "daily_loss_limit": 3.0,
+      "trailing_stop_pips": 15,
+      "breakeven_pips": 10
+    }
+  ],
+  "global_settings": {
+    "timeframe": "M30",
+    "sleep_seconds": 180,
+    "trading_start": "07:00",
+    "trading_end": "17:00",
+    "enable_time_filter": false,
+    "max_spread_multiplier": 2.0,
+    "enable_news_filter": false,
+    "log_level": "INFO"
+  },
+  "notification_settings": {
+    "email_enabled": true,
+    "sms_enabled": false,
+    "send_trade_notifications": true,
+    "send_error_notifications": true,
+    "send_daily_summary": true
+  },
+  "risk_management": {
+    "enable_trailing_stops": true,
+    "enable_breakeven": true,
+    "max_daily_trades": 10,
+    "correlation_limit": 0.7,
+    "enable_kelly_sizing": false
+  }
+}

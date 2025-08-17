@@ -1,0 +1,680 @@
+{% extends "base.html" %}
+
+{% block title %}Analytics - Forex Trading Bot{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-12">
+        <h1 class="h3 mb-0">
+            <i class="fas fa-chart-line me-2"></i>Trading Analytics
+        </h1>
+        <p class="text-muted">Comprehensive trading performance analysis and reporting</p>
+    </div>
+</div>
+
+<!-- Performance Summary Cards -->
+<div class="row mb-4">
+    <div class="col-lg-3 col-md-6 mb-3">
+        <div class="card text-center">
+            <div class="card-body">
+                <div class="text-primary mb-2">
+                    <i class="fas fa-chart-line fa-2x"></i>
+                </div>
+                <h4 class="mb-1" id="totalReturn">+0.00%</h4>
+                <p class="text-muted mb-0">Total Return</p>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-lg-3 col-md-6 mb-3">
+        <div class="card text-center">
+            <div class="card-body">
+                <div class="text-success mb-2">
+                    <i class="fas fa-trophy fa-2x"></i>
+                </div>
+                <h4 class="mb-1" id="winRateAnalytics">0%</h4>
+                <p class="text-muted mb-0">Win Rate</p>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-lg-3 col-md-6 mb-3">
+        <div class="card text-center">
+            <div class="card-body">
+                <div class="text-warning mb-2">
+                    <i class="fas fa-coins fa-2x"></i>
+                </div>
+                <h4 class="mb-1" id="profitFactor">0.00</h4>
+                <p class="text-muted mb-0">Profit Factor</p>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-lg-3 col-md-6 mb-3">
+        <div class="card text-center">
+            <div class="card-body">
+                <div class="text-danger mb-2">
+                    <i class="fas fa-arrow-down fa-2x"></i>
+                </div>
+                <h4 class="mb-1" id="maxDrawdown">0.00%</h4>
+                <p class="text-muted mb-0">Max Drawdown</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Charts Row -->
+<div class="row mb-4">
+    <!-- Equity Curve -->
+    <div class="col-lg-8 mb-4">
+        <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h5 class="mb-0">
+                    <i class="fas fa-chart-area me-2"></i>Equity Curve
+                </h5>
+                <div class="btn-group btn-group-sm" role="group">
+                    <button type="button" class="btn btn-outline-secondary active" data-period="30">30D</button>
+                    <button type="button" class="btn btn-outline-secondary" data-period="90">90D</button>
+                    <button type="button" class="btn btn-outline-secondary" data-period="365">1Y</button>
+                </div>
+            </div>
+            <div class="card-body">
+                <canvas id="equityChart" height="100"></canvas>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Daily P&L Distribution -->
+    <div class="col-lg-4 mb-4">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">
+                    <i class="fas fa-chart-pie me-2"></i>P&L Distribution
+                </h5>
+            </div>
+            <div class="card-body">
+                <canvas id="pnlDistributionChart"></canvas>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Strategy Performance and Trade Statistics -->
+<div class="row mb-4">
+    <!-- Strategy Performance -->
+    <div class="col-lg-6 mb-4">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">
+                    <i class="fas fa-cogs me-2"></i>Strategy Performance
+                </h5>
+            </div>
+            <div class="card-body">
+                <canvas id="strategyChart"></canvas>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Symbol Performance -->
+    <div class="col-lg-6 mb-4">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">
+                    <i class="fas fa-coins me-2"></i>Symbol Performance
+                </h5>
+            </div>
+            <div class="card-body">
+                <canvas id="symbolChart"></canvas>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Monthly Performance Calendar -->
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">
+                    <i class="fas fa-calendar-alt me-2"></i>Monthly Performance Calendar
+                </h5>
+            </div>
+            <div class="card-body">
+                <div id="monthlyCalendar" class="text-center">
+                    <i class="fas fa-spinner fa-spin"></i> Loading calendar...
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Detailed Statistics -->
+<div class="row mb-4">
+    <div class="col-lg-6 mb-4">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">
+                    <i class="fas fa-calculator me-2"></i>Trade Statistics
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="row" id="tradeStats">
+                    <div class="col-6 mb-3">
+                        <strong>Total Trades:</strong><br>
+                        <span class="text-muted h5" id="statTotalTrades">-</span>
+                    </div>
+                    <div class="col-6 mb-3">
+                        <strong>Avg. Trade:</strong><br>
+                        <span class="text-muted h5" id="statAvgTrade">-</span>
+                    </div>
+                    <div class="col-6 mb-3">
+                        <strong>Best Trade:</strong><br>
+                        <span class="text-success h5" id="statBestTrade">-</span>
+                    </div>
+                    <div class="col-6 mb-3">
+                        <strong>Worst Trade:</strong><br>
+                        <span class="text-danger h5" id="statWorstTrade">-</span>
+                    </div>
+                    <div class="col-6 mb-3">
+                        <strong>Avg. Win:</strong><br>
+                        <span class="text-success h5" id="statAvgWin">-</span>
+                    </div>
+                    <div class="col-6 mb-3">
+                        <strong>Avg. Loss:</strong><br>
+                        <span class="text-danger h5" id="statAvgLoss">-</span>
+                    </div>
+                    <div class="col-6 mb-3">
+                        <strong>Longest Win Streak:</strong><br>
+                        <span class="text-success h5" id="statWinStreak">-</span>
+                    </div>
+                    <div class="col-6 mb-3">
+                        <strong>Longest Loss Streak:</strong><br>
+                        <span class="text-danger h5" id="statLossStreak">-</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-lg-6 mb-4">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">
+                    <i class="fas fa-clock me-2"></i>Time Analysis
+                </h5>
+            </div>
+            <div class="card-body">
+                <canvas id="hourlyPerformanceChart"></canvas>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Recent Trades Table -->
+<div class="row">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h5 class="mb-0">
+                    <i class="fas fa-history me-2"></i>Recent Trades
+                </h5>
+                <div class="d-flex gap-2">
+                    <select class="form-select form-select-sm" id="statusFilter">
+                        <option value="all">All Trades</option>
+                        <option value="OPEN">Open Only</option>
+                        <option value="CLOSED">Closed Only</option>
+                    </select>
+                    <button class="btn btn-outline-secondary btn-sm" id="exportTrades">
+                        <i class="fas fa-download me-1"></i>Export
+                    </button>
+                </div>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-hover" id="tradesTable">
+                        <thead>
+                            <tr>
+                                <th>Date</th>
+                                <th>Symbol</th>
+                                <th>Type</th>
+                                <th>Volume</th>
+                                <th>Entry</th>
+                                <th>Exit</th>
+                                <th>Profit</th>
+                                <th>Strategy</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tradesTableBody">
+                            <tr>
+                                <td colspan="9" class="text-center py-4">
+                                    <i class="fas fa-spinner fa-spin me-2"></i>Loading trades...
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                
+                <!-- Pagination -->
+                <nav class="mt-3">
+                    <ul class="pagination justify-content-center" id="tradesPagination">
+                    </ul>
+                </nav>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/charts.js') }}"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Initialize analytics
+    initializeAnalytics();
+    
+    // Period selector for equity chart
+    document.querySelectorAll('[data-period]').forEach(btn => {
+        btn.addEventListener('click', function() {
+            document.querySelectorAll('[data-period]').forEach(b => b.classList.remove('active'));
+            this.classList.add('active');
+            loadEquityChart(this.dataset.period);
+        });
+    });
+    
+    // Status filter
+    document.getElementById('statusFilter').addEventListener('change', function() {
+        loadTradesTable(1, this.value);
+    });
+    
+    // Export trades
+    document.getElementById('exportTrades').addEventListener('click', function() {
+        exportTrades();
+    });
+});
+
+function initializeAnalytics() {
+    loadSummaryStats();
+    loadEquityChart(30);
+    loadPnlDistribution();
+    loadStrategyPerformance();
+    loadSymbolPerformance();
+    loadMonthlyCalendar();
+    loadTradeStatistics();
+    loadHourlyPerformance();
+    loadTradesTable();
+}
+
+function loadSummaryStats() {
+    fetch('/api/analytics/summary')
+        .then(response => response.json())
+        .then(data => {
+            // Update summary cards
+            const totalReturn = ((data.total_profit / 10000) * 100).toFixed(2); // Assuming 10k starting balance
+            document.getElementById('totalReturn').textContent = `${totalReturn >= 0 ? '+' : ''}${totalReturn}%`;
+            document.getElementById('totalReturn').className = totalReturn >= 0 ? 'mb-1 text-success' : 'mb-1 text-danger';
+            
+            document.getElementById('winRateAnalytics').textContent = `${data.win_rate}%`;
+            
+            // Calculate profit factor
+            const profitFactor = data.winning_trades > 0 && data.losing_trades > 0 ? 
+                (data.total_profit / Math.abs(data.total_profit - data.total_profit)).toFixed(2) : '0.00';
+            document.getElementById('profitFactor').textContent = profitFactor;
+            
+            // For now, set placeholder for max drawdown
+            document.getElementById('maxDrawdown').textContent = '0.00%';
+        })
+        .catch(error => {
+            console.error('Error loading summary stats:', error);
+        });
+}
+
+function loadEquityChart(days = 30) {
+    fetch(`/api/analytics/daily_pnl?days=${days}`)
+        .then(response => response.json())
+        .then(data => {
+            const ctx = document.getElementById('equityChart').getContext('2d');
+            
+            // Destroy existing chart if it exists
+            if (window.equityChart) {
+                window.equityChart.destroy();
+            }
+            
+            // Calculate cumulative P&L
+            let cumulative = 0;
+            const cumulativeData = data.map(item => {
+                cumulative += item.profit;
+                return {
+                    x: item.date,
+                    y: cumulative
+                };
+            });
+            
+            window.equityChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    datasets: [{
+                        label: 'Cumulative P&L',
+                        data: cumulativeData,
+                        borderColor: 'rgb(75, 192, 192)',
+                        backgroundColor: 'rgba(75, 192, 192, 0.1)',
+                        tension: 0.4,
+                        fill: true
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        x: {
+                            type: 'time',
+                            time: {
+                                unit: 'day'
+                            }
+                        },
+                        y: {
+                            title: {
+                                display: true,
+                                text: 'P&L ($)'
+                            }
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            display: false
+                        }
+                    }
+                }
+            });
+        })
+        .catch(error => {
+            console.error('Error loading equity chart:', error);
+        });
+}
+
+function loadPnlDistribution() {
+    // Placeholder for P&L distribution chart
+    const ctx = document.getElementById('pnlDistributionChart').getContext('2d');
+    
+    new Chart(ctx, {
+        type: 'doughnut',
+        data: {
+            labels: ['Profitable Days', 'Breakeven Days', 'Loss Days'],
+            datasets: [{
+                data: [60, 10, 30],
+                backgroundColor: [
+                    'rgba(34, 197, 94, 0.8)',
+                    'rgba(156, 163, 175, 0.8)',
+                    'rgba(239, 68, 68, 0.8)'
+                ]
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    position: 'bottom'
+                }
+            }
+        }
+    });
+}
+
+function loadStrategyPerformance() {
+    // Placeholder strategy performance chart
+    const ctx = document.getElementById('strategyChart').getContext('2d');
+    
+    new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: ['SMA Crossover', 'RSI Scalping', 'SMA+RSI Combo'],
+            datasets: [{
+                label: 'Profit ($)',
+                data: [1250, -320, 890],
+                backgroundColor: [
+                    'rgba(34, 197, 94, 0.8)',
+                    'rgba(239, 68, 68, 0.8)',
+                    'rgba(34, 197, 94, 0.8)'
+                ]
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    display: false
+                }
+            }
+        }
+    });
+}
+
+function loadSymbolPerformance() {
+    // Placeholder symbol performance chart
+    const ctx = document.getElementById('symbolChart').getContext('2d');
+    
+    new Chart(ctx, {
+        type: 'horizontalBar',
+        data: {
+            labels: ['EURUSD', 'GBPUSD', 'XAUUSD', 'EURGBP', 'USDJPY'],
+            datasets: [{
+                label: 'Profit ($)',
+                data: [450, 230, -150, 890, 320],
+                backgroundColor: [
+                    'rgba(34, 197, 94, 0.8)',
+                    'rgba(34, 197, 94, 0.8)',
+                    'rgba(239, 68, 68, 0.8)',
+                    'rgba(34, 197, 94, 0.8)',
+                    'rgba(34, 197, 94, 0.8)'
+                ]
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            indexAxis: 'y',
+            plugins: {
+                legend: {
+                    display: false
+                }
+            }
+        }
+    });
+}
+
+function loadMonthlyCalendar() {
+    // Placeholder monthly calendar
+    const calendarDiv = document.getElementById('monthlyCalendar');
+    calendarDiv.innerHTML = `
+        <div class="text-muted">
+            <i class="fas fa-calendar-alt fa-3x mb-3"></i>
+            <p>Monthly performance calendar will be displayed here</p>
+            <small>Feature coming soon</small>
+        </div>
+    `;
+}
+
+function loadTradeStatistics() {
+    fetch('/api/analytics/summary')
+        .then(response => response.json())
+        .then(data => {
+            document.getElementById('statTotalTrades').textContent = data.total_trades;
+            
+            const avgTrade = data.total_trades > 0 ? (data.total_profit / data.total_trades).toFixed(2) : '0.00';
+            document.getElementById('statAvgTrade').textContent = `$${avgTrade}`;
+            
+            if (data.best_trade) {
+                document.getElementById('statBestTrade').textContent = `$${data.best_trade.profit.toFixed(2)}`;
+            }
+            
+            if (data.worst_trade) {
+                document.getElementById('statWorstTrade').textContent = `$${data.worst_trade.profit.toFixed(2)}`;
+            }
+            
+            // Placeholder values for other stats
+            document.getElementById('statAvgWin').textContent = '$45.60';
+            document.getElementById('statAvgLoss').textContent = '$28.30';
+            document.getElementById('statWinStreak').textContent = '7';
+            document.getElementById('statLossStreak').textContent = '3';
+        })
+        .catch(error => {
+            console.error('Error loading trade statistics:', error);
+        });
+}
+
+function loadHourlyPerformance() {
+    // Placeholder hourly performance chart
+    const ctx = document.getElementById('hourlyPerformanceChart').getContext('2d');
+    
+    const hourlyData = Array.from({length: 24}, (_, i) => Math.random() * 200 - 100);
+    
+    new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: Array.from({length: 24}, (_, i) => `${i}:00`),
+            datasets: [{
+                label: 'Hourly P&L',
+                data: hourlyData,
+                backgroundColor: hourlyData.map(val => val >= 0 ? 'rgba(34, 197, 94, 0.8)' : 'rgba(239, 68, 68, 0.8)')
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    display: false
+                }
+            },
+            scales: {
+                x: {
+                    title: {
+                        display: true,
+                        text: 'Hour of Day'
+                    }
+                },
+                y: {
+                    title: {
+                        display: true,
+                        text: 'P&L ($)'
+                    }
+                }
+            }
+        }
+    });
+}
+
+function loadTradesTable(page = 1, status = 'all') {
+    fetch(`/api/trades?page=${page}&status=${status}&per_page=20`)
+        .then(response => response.json())
+        .then(data => {
+            updateTradesTable(data.trades);
+            updatePagination(data.current_page, data.pages);
+        })
+        .catch(error => {
+            console.error('Error loading trades table:', error);
+            document.getElementById('tradesTableBody').innerHTML = `
+                <tr>
+                    <td colspan="9" class="text-center py-4 text-danger">
+                        <i class="fas fa-exclamation-triangle me-2"></i>Error loading trades
+                    </td>
+                </tr>
+            `;
+        });
+}
+
+function updateTradesTable(trades) {
+    const tbody = document.getElementById('tradesTableBody');
+    
+    if (!trades || trades.length === 0) {
+        tbody.innerHTML = `
+            <tr>
+                <td colspan="9" class="text-center py-4 text-muted">
+                    <i class="fas fa-inbox me-2"></i>No trades found
+                </td>
+            </tr>
+        `;
+        return;
+    }
+    
+    tbody.innerHTML = trades.map(trade => {
+        const openDate = new Date(trade.open_time).toLocaleDateString();
+        const profitClass = trade.profit >= 0 ? 'text-success' : 'text-danger';
+        const statusClass = trade.status === 'OPEN' ? 'bg-warning' : 'bg-secondary';
+        
+        return `
+            <tr>
+                <td class="text-muted small">${openDate}</td>
+                <td><strong>${trade.symbol}</strong></td>
+                <td>
+                    <span class="badge ${trade.trade_type === 'BUY' ? 'bg-success' : 'bg-danger'}">
+                        ${trade.trade_type}
+                    </span>
+                </td>
+                <td>${trade.volume}</td>
+                <td>${trade.price_open.toFixed(5)}</td>
+                <td>${trade.price_close ? trade.price_close.toFixed(5) : '-'}</td>
+                <td class="${profitClass}">
+                    <strong>$${trade.profit.toFixed(2)}</strong>
+                </td>
+                <td class="text-muted small">${trade.strategy || '-'}</td>
+                <td>
+                    <span class="badge ${statusClass}">${trade.status}</span>
+                </td>
+            </tr>
+        `;
+    }).join('');
+}
+
+function updatePagination(currentPage, totalPages) {
+    const pagination = document.getElementById('tradesPagination');
+    
+    if (totalPages <= 1) {
+        pagination.innerHTML = '';
+        return;
+    }
+    
+    let paginationHTML = '';
+    
+    // Previous button
+    paginationHTML += `
+        <li class="page-item ${currentPage === 1 ? 'disabled' : ''}">
+            <a class="page-link" href="#" onclick="loadTradesTable(${currentPage - 1}, document.getElementById('statusFilter').value)">
+                <i class="fas fa-chevron-left"></i>
+            </a>
+        </li>
+    `;
+    
+    // Page numbers
+    for (let i = 1; i <= totalPages; i++) {
+        if (i === 1 || i === totalPages || (i >= currentPage - 2 && i <= currentPage + 2)) {
+            paginationHTML += `
+                <li class="page-item ${i === currentPage ? 'active' : ''}">
+                    <a class="page-link" href="#" onclick="loadTradesTable(${i}, document.getElementById('statusFilter').value)">${i}</a>
+                </li>
+            `;
+        } else if (i === currentPage - 3 || i === currentPage + 3) {
+            paginationHTML += '<li class="page-item disabled"><span class="page-link">...</span></li>';
+        }
+    }
+    
+    // Next button
+    paginationHTML += `
+        <li class="page-item ${currentPage === totalPages ? 'disabled' : ''}">
+            <a class="page-link" href="#" onclick="loadTradesTable(${currentPage + 1}, document.getElementById('statusFilter').value)">
+                <i class="fas fa-chevron-right"></i>
+            </a>
+        </li>
+    `;
+    
+    pagination.innerHTML = paginationHTML;
+}
+
+function exportTrades() {
+    // Placeholder for export functionality
+    alert('Export functionality will be implemented soon');
+}
+</script>
+{% endblock %}

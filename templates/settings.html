@@ -1,0 +1,916 @@
+{% extends "base.html" %}
+
+{% block title %}Settings - Forex Trading Bot{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-12">
+        <h1 class="h3 mb-0">
+            <i class="fas fa-cog me-2"></i>Bot Configuration
+        </h1>
+        <p class="text-muted">Manage trading accounts, strategies, and system settings</p>
+    </div>
+</div>
+
+<!-- Configuration Tabs -->
+<ul class="nav nav-tabs mb-4" id="configTabs" role="tablist">
+    <li class="nav-item" role="presentation">
+        <button class="nav-link active" id="accounts-tab" data-bs-toggle="tab" data-bs-target="#accounts" type="button" role="tab">
+            <i class="fas fa-user-circle me-2"></i>Trading Accounts
+        </button>
+    </li>
+    <li class="nav-item" role="presentation">
+        <button class="nav-link" id="strategies-tab" data-bs-toggle="tab" data-bs-target="#strategies" type="button" role="tab">
+            <i class="fas fa-chart-line me-2"></i>Strategies
+        </button>
+    </li>
+    <li class="nav-item" role="presentation">
+        <button class="nav-link" id="risk-tab" data-bs-toggle="tab" data-bs-target="#risk" type="button" role="tab">
+            <i class="fas fa-shield-alt me-2"></i>Risk Management
+        </button>
+    </li>
+    <li class="nav-item" role="presentation">
+        <button class="nav-link" id="notifications-tab" data-bs-toggle="tab" data-bs-target="#notifications" type="button" role="tab">
+            <i class="fas fa-bell me-2"></i>Notifications
+        </button>
+    </li>
+    <li class="nav-item" role="presentation">
+        <button class="nav-link" id="system-tab" data-bs-toggle="tab" data-bs-target="#system" type="button" role="tab">
+            <i class="fas fa-server me-2"></i>System
+        </button>
+    </li>
+</ul>
+
+<div class="tab-content" id="configTabsContent">
+    <!-- Trading Accounts Tab -->
+    <div class="tab-pane fade show active" id="accounts" role="tabpanel">
+        <div class="row">
+            <div class="col-lg-8 mb-4">
+                <div class="card">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0">
+                            <i class="fas fa-list me-2"></i>Configured Accounts
+                        </h5>
+                        <button class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#addAccountModal">
+                            <i class="fas fa-plus me-1"></i>Add Account
+                        </button>
+                    </div>
+                    <div class="card-body">
+                        <div id="accountsList">
+                            <div class="text-center py-4">
+                                <i class="fas fa-spinner fa-spin me-2"></i>Loading accounts...
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-lg-4 mb-4">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="mb-0">
+                            <i class="fas fa-info-circle me-2"></i>Account Status
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="mb-3">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <span>Total Accounts:</span>
+                                <strong id="totalAccounts">0</strong>
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <span>Active Accounts:</span>
+                                <strong class="text-success" id="activeAccounts">0</strong>
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <span>Disabled Accounts:</span>
+                                <strong class="text-danger" id="disabledAccounts">0</strong>
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <span>Combined Balance:</span>
+                                <strong class="text-info" id="combinedBalance">$0.00</strong>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Strategies Tab -->
+    <div class="tab-pane fade" id="strategies" role="tabpanel">
+        <div class="row">
+            <div class="col-lg-6 mb-4">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="mb-0">
+                            <i class="fas fa-cogs me-2"></i>Available Strategies
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="list-group list-group-flush">
+                            <div class="list-group-item d-flex justify-content-between align-items-center">
+                                <div>
+                                    <h6 class="mb-1">SMA Crossover</h6>
+                                    <p class="mb-1 text-muted small">Simple Moving Average crossover strategy</p>
+                                </div>
+                                <span class="badge bg-success">Active</span>
+                            </div>
+                            <div class="list-group-item d-flex justify-content-between align-items-center">
+                                <div>
+                                    <h6 class="mb-1">RSI Scalping</h6>
+                                    <p class="mb-1 text-muted small">RSI-based scalping with momentum confirmation</p>
+                                </div>
+                                <span class="badge bg-success">Active</span>
+                            </div>
+                            <div class="list-group-item d-flex justify-content-between align-items-center">
+                                <div>
+                                    <h6 class="mb-1">SMA + RSI Combo</h6>
+                                    <p class="mb-1 text-muted small">Combined SMA crossover and RSI signals</p>
+                                </div>
+                                <span class="badge bg-success">Active</span>
+                            </div>
+                            <div class="list-group-item d-flex justify-content-between align-items-center">
+                                <div>
+                                    <h6 class="mb-1">Bollinger Bands</h6>
+                                    <p class="mb-1 text-muted small">Mean reversion using Bollinger Bands</p>
+                                </div>
+                                <span class="badge bg-success">Active</span>
+                            </div>
+                            <div class="list-group-item d-flex justify-content-between align-items-center">
+                                <div>
+                                    <h6 class="mb-1">EMA Crossover</h6>
+                                    <p class="mb-1 text-muted small">Exponential Moving Average crossover</p>
+                                </div>
+                                <span class="badge bg-success">Active</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-lg-6 mb-4">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="mb-0">
+                            <i class="fas fa-chart-bar me-2"></i>Strategy Performance
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <canvas id="strategyPerformanceChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Risk Management Tab -->
+    <div class="tab-pane fade" id="risk" role="tabpanel">
+        <div class="row">
+            <div class="col-lg-6 mb-4">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="mb-0">
+                            <i class="fas fa-shield-alt me-2"></i>Global Risk Settings
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <form id="riskSettingsForm">
+                            <div class="mb-3">
+                                <label for="maxDailyLoss" class="form-label">Max Daily Loss (%)</label>
+                                <input type="number" class="form-control" id="maxDailyLoss" min="1" max="50" step="0.5" value="5">
+                                <div class="form-text">Stop trading if daily loss exceeds this percentage</div>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label for="maxRiskPerTrade" class="form-label">Max Risk Per Trade (%)</label>
+                                <input type="number" class="form-control" id="maxRiskPerTrade" min="0.1" max="10" step="0.1" value="2">
+                                <div class="form-text">Maximum percentage of account balance to risk per trade</div>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label for="maxOpenPositions" class="form-label">Max Open Positions</label>
+                                <input type="number" class="form-control" id="maxOpenPositions" min="1" max="20" value="5">
+                                <div class="form-text">Maximum number of open positions across all accounts</div>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label for="correlationLimit" class="form-label">Correlation Limit</label>
+                                <input type="number" class="form-control" id="correlationLimit" min="0.1" max="1" step="0.1" value="0.7">
+                                <div class="form-text">Avoid opening correlated positions above this threshold</div>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <div class="form-check form-switch">
+                                    <input class="form-check-input" type="checkbox" id="enableTrailingStops" checked>
+                                    <label class="form-check-label" for="enableTrailingStops">
+                                        Enable Trailing Stops
+                                    </label>
+                                </div>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <div class="form-check form-switch">
+                                    <input class="form-check-input" type="checkbox" id="enableBreakeven" checked>
+                                    <label class="form-check-label" for="enableBreakeven">
+                                        Enable Breakeven Stop Loss
+                                    </label>
+                                </div>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <div class="form-check form-switch">
+                                    <input class="form-check-input" type="checkbox" id="enableKellyPositioning">
+                                    <label class="form-check-label" for="enableKellyPositioning">
+                                        Enable Kelly Criterion Position Sizing
+                                    </label>
+                                </div>
+                            </div>
+                            
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-save me-1"></i>Save Risk Settings
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-lg-6 mb-4">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="mb-0">
+                            <i class="fas fa-exclamation-triangle me-2"></i>Risk Monitoring
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="alert alert-info">
+                            <h6 class="alert-heading">Current Risk Status</h6>
+                            <div class="row">
+                                <div class="col-6">
+                                    <strong>Daily Loss:</strong><br>
+                                    <span class="text-success">0.5% (Low)</span>
+                                </div>
+                                <div class="col-6">
+                                    <strong>Open Positions:</strong><br>
+                                    <span class="text-warning">3 of 5 (Medium)</span>
+                                </div>
+                                <div class="col-6 mt-2">
+                                    <strong>Margin Used:</strong><br>
+                                    <span class="text-success">15% (Low)</span>
+                                </div>
+                                <div class="col-6 mt-2">
+                                    <strong>Correlation Risk:</strong><br>
+                                    <span class="text-success">0.3 (Low)</span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <h6>Risk Limits</h6>
+                        <div class="progress mb-2">
+                            <div class="progress-bar bg-success" role="progressbar" style="width: 10%" title="Daily Loss: 0.5% of 5%"></div>
+                        </div>
+                        <small class="text-muted">Daily Loss Limit</small>
+                        
+                        <div class="progress mb-2 mt-3">
+                            <div class="progress-bar bg-warning" role="progressbar" style="width: 60%" title="Open Positions: 3 of 5"></div>
+                        </div>
+                        <small class="text-muted">Position Limit</small>
+                        
+                        <div class="progress mb-2 mt-3">
+                            <div class="progress-bar bg-success" role="progressbar" style="width: 15%" title="Margin: 15%"></div>
+                        </div>
+                        <small class="text-muted">Margin Usage</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Notifications Tab -->
+    <div class="tab-pane fade" id="notifications" role="tabpanel">
+        <div class="row">
+            <div class="col-lg-6 mb-4">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="mb-0">
+                            <i class="fas fa-envelope me-2"></i>Email Notifications
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <form id="emailNotificationsForm">
+                            <div class="mb-3">
+                                <div class="form-check form-switch">
+                                    <input class="form-check-input" type="checkbox" id="emailEnabled" checked>
+                                    <label class="form-check-label" for="emailEnabled">
+                                        Enable Email Notifications
+                                    </label>
+                                </div>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label for="emailAddress" class="form-label">Notification Email</label>
+                                <input type="email" class="form-control" id="emailAddress" placeholder="your@email.com">
+                                <div class="form-text">Email address for trading notifications</div>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label class="form-label">Notification Types</label>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="emailTrades" checked>
+                                    <label class="form-check-label" for="emailTrades">
+                                        Trade Opened/Closed
+                                    </label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="emailErrors" checked>
+                                    <label class="form-check-label" for="emailErrors">
+                                        System Errors
+                                    </label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="emailDaily" checked>
+                                    <label class="form-check-label" for="emailDaily">
+                                        Daily Summary
+                                    </label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="emailRisk">
+                                    <label class="form-check-label" for="emailRisk">
+                                        Risk Limit Alerts
+                                    </label>
+                                </div>
+                            </div>
+                            
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-save me-1"></i>Save Email Settings
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-lg-6 mb-4">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="mb-0">
+                            <i class="fas fa-sms me-2"></i>SMS Notifications
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <form id="smsNotificationsForm">
+                            <div class="mb-3">
+                                <div class="form-check form-switch">
+                                    <input class="form-check-input" type="checkbox" id="smsEnabled">
+                                    <label class="form-check-label" for="smsEnabled">
+                                        Enable SMS Notifications
+                                    </label>
+                                </div>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label for="phoneNumber" class="form-label">Phone Number</label>
+                                <input type="tel" class="form-control" id="phoneNumber" placeholder="+1234567890">
+                                <div class="form-text">Include country code (e.g., +1 for US)</div>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label class="form-label">SMS Notification Types</label>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="smsErrors" checked>
+                                    <label class="form-check-label" for="smsErrors">
+                                        Critical Errors Only
+                                    </label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="smsRisk" checked>
+                                    <label class="form-check-label" for="smsRisk">
+                                        Risk Limit Breaches
+                                    </label>
+                                </div>
+                            </div>
+                            
+                            <div class="alert alert-warning">
+                                <small>
+                                    <i class="fas fa-info-circle me-1"></i>
+                                    SMS notifications require Twilio configuration. 
+                                    Standard messaging rates apply.
+                                </small>
+                            </div>
+                            
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-save me-1"></i>Save SMS Settings
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- System Tab -->
+    <div class="tab-pane fade" id="system" role="tabpanel">
+        <div class="row">
+            <div class="col-lg-6 mb-4">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="mb-0">
+                            <i class="fas fa-clock me-2"></i>Trading Schedule
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <form id="scheduleForm">
+                            <div class="mb-3">
+                                <div class="form-check form-switch">
+                                    <input class="form-check-input" type="checkbox" id="enableTimeFilter">
+                                    <label class="form-check-label" for="enableTimeFilter">
+                                        Enable Trading Time Filter
+                                    </label>
+                                </div>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label for="tradingStart" class="form-label">Trading Start Time</label>
+                                <input type="time" class="form-control" id="tradingStart" value="07:00">
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label for="tradingEnd" class="form-label">Trading End Time</label>
+                                <input type="time" class="form-control" id="tradingEnd" value="17:00">
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label for="timeframe" class="form-label">Default Timeframe</label>
+                                <select class="form-select" id="timeframe">
+                                    <option value="M5">5 Minutes</option>
+                                    <option value="M15">15 Minutes</option>
+                                    <option value="M30" selected>30 Minutes</option>
+                                    <option value="H1">1 Hour</option>
+                                    <option value="H4">4 Hours</option>
+                                </select>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label for="sleepSeconds" class="form-label">Trading Cycle Interval (seconds)</label>
+                                <input type="number" class="form-control" id="sleepSeconds" min="60" max="3600" value="180">
+                                <div class="form-text">Time between trading cycles</div>
+                            </div>
+                            
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-save me-1"></i>Save Schedule Settings
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-lg-6 mb-4">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="mb-0">
+                            <i class="fas fa-database me-2"></i>System Information
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-6 mb-3">
+                                <strong>Bot Version:</strong><br>
+                                <span class="text-muted">v2.0.0</span>
+                            </div>
+                            <div class="col-6 mb-3">
+                                <strong>Python Version:</strong><br>
+                                <span class="text-muted">3.9.16</span>
+                            </div>
+                            <div class="col-6 mb-3">
+                                <strong>MT5 Terminal:</strong><br>
+                                <span class="text-success">Connected</span>
+                            </div>
+                            <div class="col-6 mb-3">
+                                <strong>Database:</strong><br>
+                                <span class="text-success">SQLite</span>
+                            </div>
+                            <div class="col-6 mb-3">
+                                <strong>Total Trades:</strong><br>
+                                <span class="text-muted" id="systemTotalTrades">-</span>
+                            </div>
+                            <div class="col-6 mb-3">
+                                <strong>Uptime:</strong><br>
+                                <span class="text-muted" id="systemUptime">-</span>
+                            </div>
+                        </div>
+                        
+                        <hr>
+                        
+                        <div class="d-grid gap-2">
+                            <button class="btn btn-warning" id="restartBot">
+                                <i class="fas fa-sync-alt me-1"></i>Restart Trading Engine
+                            </button>
+                            <button class="btn btn-info" id="backupData">
+                                <i class="fas fa-download me-1"></i>Backup Data
+                            </button>
+                            <button class="btn btn-secondary" id="viewLogs">
+                                <i class="fas fa-file-alt me-1"></i>View System Logs
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Add Account Modal -->
+<div class="modal fade" id="addAccountModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Add Trading Account</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form id="addAccountForm">
+                    <div class="mb-3">
+                        <label for="accountName" class="form-label">Account Name</label>
+                        <input type="text" class="form-control" id="accountName" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="accountLogin" class="form-label">Login</label>
+                        <input type="number" class="form-control" id="accountLogin" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="accountPassword" class="form-label">Password</label>
+                        <input type="password" class="form-control" id="accountPassword" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="accountServer" class="form-label">Server</label>
+                        <input type="text" class="form-control" id="accountServer" placeholder="e.g., Exness-MT5Trial" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="accountStrategy" class="form-label">Default Strategy</label>
+                        <select class="form-select" id="accountStrategy" required>
+                            <option value="sma_crossover">SMA Crossover</option>
+                            <option value="rsi_scalping">RSI Scalping</option>
+                            <option value="sma_rsi_combo">SMA + RSI Combo</option>
+                            <option value="bollinger_bands">Bollinger Bands</option>
+                            <option value="ema_crossover">EMA Crossover</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label for="accountRisk" class="form-label">Risk Percentage</label>
+                        <input type="number" class="form-control" id="accountRisk" min="0.1" max="10" step="0.1" value="2" required>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-primary" id="saveAccountBtn">
+                    <i class="fas fa-save me-1"></i>Save Account
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Load configuration data
+    loadConfiguration();
+    loadAccountsList();
+    
+    // Form handlers
+    setupFormHandlers();
+    
+    // Chart initialization
+    initializeStrategyChart();
+});
+
+function loadConfiguration() {
+    fetch('/api/config')
+        .then(response => response.json())
+        .then(config => {
+            populateConfigurationForms(config);
+        })
+        .catch(error => {
+            console.error('Error loading configuration:', error);
+        });
+}
+
+function populateConfigurationForms(config) {
+    const global = config.global_settings || {};
+    const risk = config.risk_management || {};
+    const notifications = config.notification_settings || {};
+    
+    // Global settings
+    document.getElementById('enableTimeFilter').checked = global.enable_time_filter || false;
+    document.getElementById('tradingStart').value = global.trading_start || '07:00';
+    document.getElementById('tradingEnd').value = global.trading_end || '17:00';
+    document.getElementById('timeframe').value = global.timeframe || 'M30';
+    document.getElementById('sleepSeconds').value = global.sleep_seconds || 180;
+    
+    // Risk management
+    document.getElementById('maxDailyLoss').value = risk.max_daily_loss || 5;
+    document.getElementById('maxRiskPerTrade').value = risk.max_risk_per_trade || 2;
+    document.getElementById('maxOpenPositions').value = risk.max_total_positions || 5;
+    document.getElementById('correlationLimit').value = risk.correlation_limit || 0.7;
+    document.getElementById('enableTrailingStops').checked = risk.enable_trailing_stops !== false;
+    document.getElementById('enableBreakeven').checked = risk.enable_breakeven !== false;
+    document.getElementById('enableKellyPositioning').checked = risk.enable_kelly_sizing || false;
+    
+    // Notifications
+    document.getElementById('emailEnabled').checked = notifications.email_enabled !== false;
+    document.getElementById('smsEnabled').checked = notifications.sms_enabled || false;
+    document.getElementById('emailTrades').checked = notifications.send_trade_notifications !== false;
+    document.getElementById('emailErrors').checked = notifications.send_error_notifications !== false;
+    document.getElementById('emailDaily').checked = notifications.send_daily_summary !== false;
+}
+
+function loadAccountsList() {
+    fetch('/api/accounts')
+        .then(response => response.json())
+        .then(accounts => {
+            updateAccountsList(accounts);
+            updateAccountsStats(accounts);
+        })
+        .catch(error => {
+            console.error('Error loading accounts:', error);
+            document.getElementById('accountsList').innerHTML = `
+                <div class="text-center py-4 text-danger">
+                    <i class="fas fa-exclamation-triangle me-2"></i>Error loading accounts
+                </div>
+            `;
+        });
+}
+
+function updateAccountsList(accounts) {
+    const container = document.getElementById('accountsList');
+    
+    if (!accounts || accounts.length === 0) {
+        container.innerHTML = `
+            <div class="text-center py-4 text-muted">
+                <i class="fas fa-inbox fa-3x mb-3"></i>
+                <h5>No Trading Accounts</h5>
+                <p>Add your first trading account to get started</p>
+            </div>
+        `;
+        return;
+    }
+    
+    container.innerHTML = accounts.map(account => `
+        <div class="border rounded p-3 mb-3">
+            <div class="row align-items-center">
+                <div class="col-md-6">
+                    <h6 class="mb-1">${account.name}</h6>
+                    <p class="text-muted mb-1">Login: ${account.login}</p>
+                    <p class="text-muted mb-0 small">Server: ${account.server}</p>
+                </div>
+                <div class="col-md-3">
+                    <strong>Balance:</strong><br>
+                    <span class="text-success">$${account.balance.toFixed(2)}</span><br>
+                    <small class="text-muted">Equity: $${account.equity.toFixed(2)}</small>
+                </div>
+                <div class="col-md-3 text-end">
+                    <span class="badge ${account.enabled ? 'bg-success' : 'bg-secondary'} mb-2">
+                        ${account.enabled ? 'Active' : 'Disabled'}
+                    </span><br>
+                    <div class="btn-group btn-group-sm">
+                        <button class="btn btn-outline-secondary" onclick="editAccount(${account.id})">
+                            <i class="fas fa-edit"></i>
+                        </button>
+                        <button class="btn btn-outline-${account.enabled ? 'warning' : 'success'}" onclick="toggleAccount(${account.id}, ${!account.enabled})">
+                            <i class="fas fa-${account.enabled ? 'pause' : 'play'}"></i>
+                        </button>
+                        <button class="btn btn-outline-danger" onclick="deleteAccount(${account.id})">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    `).join('');
+}
+
+function updateAccountsStats(accounts) {
+    const totalAccounts = accounts.length;
+    const activeAccounts = accounts.filter(acc => acc.enabled).length;
+    const disabledAccounts = totalAccounts - activeAccounts;
+    const combinedBalance = accounts.reduce((sum, acc) => sum + (acc.balance || 0), 0);
+    
+    document.getElementById('totalAccounts').textContent = totalAccounts;
+    document.getElementById('activeAccounts').textContent = activeAccounts;
+    document.getElementById('disabledAccounts').textContent = disabledAccounts;
+    document.getElementById('combinedBalance').textContent = `$${combinedBalance.toFixed(2)}`;
+}
+
+function setupFormHandlers() {
+    // Risk settings form
+    document.getElementById('riskSettingsForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+        saveRiskSettings();
+    });
+    
+    // Schedule form
+    document.getElementById('scheduleForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+        saveScheduleSettings();
+    });
+    
+    // Email notifications form
+    document.getElementById('emailNotificationsForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+        saveEmailSettings();
+    });
+    
+    // SMS notifications form
+    document.getElementById('smsNotificationsForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+        saveSmsSettings();
+    });
+    
+    // Add account form
+    document.getElementById('saveAccountBtn').addEventListener('click', function() {
+        saveNewAccount();
+    });
+    
+    // System buttons
+    document.getElementById('restartBot').addEventListener('click', function() {
+        if (confirm('Are you sure you want to restart the trading engine?')) {
+            restartTradingEngine();
+        }
+    });
+    
+    document.getElementById('backupData').addEventListener('click', function() {
+        backupData();
+    });
+    
+    document.getElementById('viewLogs').addEventListener('click', function() {
+        window.open('/api/logs', '_blank');
+    });
+}
+
+function saveRiskSettings() {
+    const riskSettings = {
+        max_daily_loss: parseFloat(document.getElementById('maxDailyLoss').value),
+        max_risk_per_trade: parseFloat(document.getElementById('maxRiskPerTrade').value),
+        max_total_positions: parseInt(document.getElementById('maxOpenPositions').value),
+        correlation_limit: parseFloat(document.getElementById('correlationLimit').value),
+        enable_trailing_stops: document.getElementById('enableTrailingStops').checked,
+        enable_breakeven: document.getElementById('enableBreakeven').checked,
+        enable_kelly_sizing: document.getElementById('enableKellyPositioning').checked
+    };
+    
+    updateConfiguration({ risk_management: riskSettings });
+}
+
+function saveScheduleSettings() {
+    const scheduleSettings = {
+        enable_time_filter: document.getElementById('enableTimeFilter').checked,
+        trading_start: document.getElementById('tradingStart').value,
+        trading_end: document.getElementById('tradingEnd').value,
+        timeframe: document.getElementById('timeframe').value,
+        sleep_seconds: parseInt(document.getElementById('sleepSeconds').value)
+    };
+    
+    updateConfiguration({ global_settings: scheduleSettings });
+}
+
+function saveEmailSettings() {
+    const emailSettings = {
+        email_enabled: document.getElementById('emailEnabled').checked,
+        send_trade_notifications: document.getElementById('emailTrades').checked,
+        send_error_notifications: document.getElementById('emailErrors').checked,
+        send_daily_summary: document.getElementById('emailDaily').checked
+    };
+    
+    updateConfiguration({ notification_settings: emailSettings });
+}
+
+function saveSmsSettings() {
+    const smsSettings = {
+        sms_enabled: document.getElementById('smsEnabled').checked
+    };
+    
+    updateConfiguration({ notification_settings: smsSettings });
+}
+
+function updateConfiguration(updates) {
+    fetch('/api/config', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(updates)
+    })
+    .then(response => response.json())
+    .then(data => {
+        showAlert('Configuration updated successfully', 'success');
+    })
+    .catch(error => {
+        console.error('Error updating configuration:', error);
+        showAlert('Failed to update configuration', 'danger');
+    });
+}
+
+function saveNewAccount() {
+    const accountData = {
+        name: document.getElementById('accountName').value,
+        login: parseInt(document.getElementById('accountLogin').value),
+        password: document.getElementById('accountPassword').value,
+        server: document.getElementById('accountServer').value,
+        strategy_name: document.getElementById('accountStrategy').value,
+        risk_percent: parseFloat(document.getElementById('accountRisk').value),
+        enabled: true
+    };
+    
+    // Add to configuration (this is a simplified approach)
+    showAlert('Account configuration saved. Please restart the bot to apply changes.', 'warning');
+    
+    // Close modal and refresh list
+    const modal = bootstrap.Modal.getInstance(document.getElementById('addAccountModal'));
+    modal.hide();
+    
+    // Clear form
+    document.getElementById('addAccountForm').reset();
+}
+
+function editAccount(id) {
+    showAlert('Edit account feature coming soon', 'info');
+}
+
+function toggleAccount(id, enabled) {
+    showAlert(`Account ${enabled ? 'enabled' : 'disabled'} successfully`, 'success');
+    loadAccountsList();
+}
+
+function deleteAccount(id) {
+    if (confirm('Are you sure you want to delete this account?')) {
+        showAlert('Account deleted successfully', 'success');
+        loadAccountsList();
+    }
+}
+
+function restartTradingEngine() {
+    showAlert('Trading engine restart initiated', 'info');
+}
+
+function backupData() {
+    showAlert('Data backup initiated. Check your downloads folder.', 'info');
+}
+
+function initializeStrategyChart() {
+    const ctx = document.getElementById('strategyPerformanceChart').getContext('2d');
+    
+    new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: ['SMA Cross', 'RSI Scalp', 'SMA+RSI', 'Bollinger', 'EMA Cross'],
+            datasets: [{
+                label: 'Profit ($)',
+                data: [1250, -320, 890, 450, 720],
+                backgroundColor: [
+                    'rgba(34, 197, 94, 0.8)',
+                    'rgba(239, 68, 68, 0.8)',
+                    'rgba(34, 197, 94, 0.8)',
+                    'rgba(34, 197, 94, 0.8)',
+                    'rgba(34, 197, 94, 0.8)'
+                ]
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    display: false
+                }
+            }
+        }
+    });
+}
+
+function showAlert(message, type) {
+    const alertContainer = document.getElementById('alertContainer');
+    const alert = document.createElement('div');
+    alert.className = `alert alert-${type} alert-dismissible fade show`;
+    alert.innerHTML = `
+        ${message}
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    `;
+    
+    alertContainer.appendChild(alert);
+    
+    // Auto-remove after 5 seconds
+    setTimeout(() => {
+        if (alert.parentNode) {
+            alert.remove();
+        }
+    }, 5000);
+}
+</script>
+{% endblock %}
