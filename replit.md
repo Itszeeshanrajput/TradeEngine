@@ -2,6 +2,14 @@
 
 This is a comprehensive automated Forex trading bot application built with Flask and MetaTrader 5 integration. The system manages multiple trading accounts simultaneously, executes trades based on configurable strategies, and provides a real-time web dashboard for monitoring and control. The bot supports various trading strategies (SMA crossover, RSI scalping, hybrid approaches), implements sophisticated risk management, and includes backtesting capabilities for strategy validation.
 
+## Recent Changes (August 2025)
+- Fixed main.py socketio.run() parameter issues 
+- Resolved trading_engine.py model constructor problems
+- Improved WebSocket configuration for better stability
+- Created comprehensive Windows setup automation with setup.bat
+- Added multiple startup methods (start_with_eventlet.py recommended)
+- Implemented troubleshooting documentation and recovery procedures
+
 # User Preferences
 
 Preferred communication style: Simple, everyday language.

@@ -35,5 +35,6 @@ if __name__ == "__main__":
         port=5000, 
         debug=False, 
         allow_unsafe_werkzeug=True,
-        use_reloader=False
+        use_reloader=False,
+        log_output=True
     )
