@@ -1,0 +1,33 @@
+{
+  "accounts": [
+    {
+      "name": "Primary Demo Account",
+      "login": 248388896,
+      "password": "@Zeeshan786",
+      "server": "Exness-MT5Trial",
+      "symbols": ["EURUSDm", "GBPUSDm", "XAUUSDm", "EURGBPm", "USDJPYm"],
+      "risk_percent": 3.0,
+      "max_volume": 0.2,
+      "strategy_name": "sma_rsi_combo",
+      "enabled": true
+    },
+    {
+      "name": "Scalping Account",
+      "login": 248388896,
+      "password": "@Zeeshan786",
+      "server": "Exness-MT5Trial",
+      "symbols": ["EURUSDm", "GBPUSDm", "XAUUSDm", "EURGBPm", "USDJPYm", "ADAUSDm", "BTCUSDm", "ETHUSDm", "SOLUSDm", "XRPUSDm", "ETHUSDm", "LINKUSDm", "1INCHUSDm", "BNBUSDm"],
+      "risk_percent": 0.5,
+      "max_volume": 0.5,
+      "strategy_name": "rsi_scalping",
+      "enabled": true
+    }
+  ],
+  "global_settings": {
+    "timeframe": "M30",
+    "sleep_seconds": 300,
+    "trading_start": "07:00",
+    "trading_end": "17:00",
+    "enable_time_filter": false
+  }
+}

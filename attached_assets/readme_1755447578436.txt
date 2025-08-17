@@ -1,0 +1,53 @@
+# Enhanced Forex Trading Bot
+
+This automated trading bot is designed for MetaTrader 5. It can manage multiple accounts and currency pairs simultaneously, driven by a central configuration file. It also includes a simple web-based GUI for monitoring activity.
+
+## Features
+
+- **Multi-Account Management**: Trade on several MT5 accounts from a single instance.
+- **Multi-Pair Trading**: Run strategies on multiple currency pairs per account.
+- **Config-Driven**: All settings, accounts, and strategies are managed in `config.json`.
+- **Modular Strategies**: Easily add or switch between different trading strategies.
+- **Advanced Risk Management**: Includes dynamic position sizing, trailing stops, and break-even stop loss.
+- **Monitoring GUI**: A simple web dashboard to view live trading logs.
+
+## Setup Instructions
+
+1.  **Install Python**: Ensure you have Python 3.8 or newer installed.
+
+2.  **Create Project Folder**: Create a new folder named `forex-bot` and place all the project files inside it.
+
+3.  **Install Dependencies**: Open your terminal or command prompt, navigate to the `forex-bot` folder, and install the required packages using the `requirements.txt` file:
+    ```bash
+    pip install -r requirements.txt
+    ```
+
+4.  **Install MetaTrader 5**: Make sure the MetaTrader 5 terminal is installed on your machine. The bot connects directly to it.
+
+5.  **Configure the Bot**:
+    *   Open the `config.json` file.
+    *   Under `accounts`, enter the login details for each MT5 account you want to manage.
+    *   For each account, list the `symbols` you want to trade and set the `risk_percent`.
+    *   Adjust the `global_settings` like `timeframe` and `strategy_name` as needed.
+
+## How to Run the Bot
+
+The bot and the GUI run as two separate processes.
+
+1.  **Run the Trading Bot**:
+    *   Open your terminal, navigate to the project folder.
+    *   Run the `main.py` script.
+    *   The bot will now connect to MT5 and start trading based on your configuration.
+    ```bash
+    python main.py
+    ```
+
+2.  **Run the Monitoring GUI**:
+    *   Open a **second** terminal and navigate to the project folder.
+    *   Run the `gui.py` script.
+    ```bash
+    python gui.py
+    ```
+    *   Open your web browser and go to **http://127.0.0.1:8050** to see the dashboard. The dashboard will show logs from the `trade_bot.log` file in real-time.
+
+**Disclaimer**: Financial trading involves substantial risk. This bot is a tool, not a guarantee of profit. **Always test thoroughly on a demo account** before using real money. The developers are not responsible for any financial losses.

@@ -1,0 +1,33 @@
+{
+    "account_info": {
+        "balance": 98.72,
+        "equity": 97.66,
+        "margin": 14.14,
+        "margin_free": 83.52,
+        "currency": "USD"
+    },
+    "positions": [
+        {
+            "ticket": 2575693676,
+            "symbol": "EURGBPm",
+            "type": "SELL",
+            "volume": 0.01,
+            "price_open": 0.86326,
+            "price_current": 0.86379,
+            "sl": 0.86401,
+            "tp": 0.86175,
+            "profit": -0.72
+        },
+        {
+            "ticket": 2577343208,
+            "symbol": "GBPUSDm",
+            "type": "SELL",
+            "volume": 0.02,
+            "price_open": 1.35524,
+            "price_current": 1.35541,
+            "sl": 1.35682,
+            "tp": 1.35208,
+            "profit": -0.34
+        }
+    ]
+}
