@@ -16,4 +16,4 @@ if __name__ == "__main__":
     
     # Start Flask-SocketIO server with eventlet
     print("Starting Forex Trading Bot Dashboard on http://0.0.0.0:5000")
-    socketio.run(app, host='0.0.0.0', port=5000, debug=False, allow_unsafe_werkzeug=True)
+    socketio.run(app, host='0.0.0.0', port=5000, debug=False, allow_unsafe_werkzeug=True, use_reloader=False, log_output=False)

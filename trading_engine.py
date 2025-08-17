@@ -10,8 +10,9 @@ try:
 except ImportError:
     # Mock Trader class for development
     class Trader:
-        def __init__(self, config):
-            self.config = config
+        def __init__(self, account_config, global_settings=None):
+            self.config = account_config
+            self.global_settings = global_settings or {}
         
         def connect(self):
             return True
@@ -24,6 +25,10 @@ except ImportError:
         
         def check_signals_and_trade(self):
             return []
+        
+        def run_session(self):
+            """Mock run session for development"""
+            pass
 from notifications import NotificationManager
 
 class TradingEngine:
@@ -39,11 +44,10 @@ class TradingEngine:
             def emit(self, record):
                 with app.app_context():
                     try:
-                        log_entry = SystemLog(
-                            level=record.levelname,
-                            message=record.getMessage(),
-                            module=record.module if hasattr(record, 'module') else record.name
-                        )
+                        log_entry = SystemLog()
+                        log_entry.level = record.levelname
+                        log_entry.message = record.getMessage()
+                        log_entry.module = record.module if hasattr(record, 'module') else record.name
                         db.session.add(log_entry)
                         db.session.commit()
                     except Exception:
@@ -80,12 +84,11 @@ class TradingEngine:
                 existing_account = Account.query.filter_by(login=account_config['login']).first()
                 
                 if not existing_account:
-                    account = Account(
-                        name=account_config['name'],
-                        login=account_config['login'],
-                        server=account_config['server'],
-                        enabled=account_config.get('enabled', True)
-                    )
+                    account = Account()
+                    account.name = account_config['name']
+                    account.login = account_config['login']
+                    account.server = account_config['server']
+                    account.enabled = account_config.get('enabled', True)
                     db.session.add(account)
                 else:
                     existing_account.name = account_config['name']
@@ -127,7 +130,11 @@ class TradingEngine:
                 
                 try:
                     trader = Trader(account_config, self.config.get("global_settings", {}))
-                    trader.run_session()
+                    if hasattr(trader, 'run_session'):
+                        trader.run_session()
+                    else:
+                        # For mock trader, just connect and check status
+                        trader.connect()
                     
                     # Update account info in database
                     self.update_account_info(account_config['login'])
@@ -148,22 +155,27 @@ class TradingEngine:
     
     def update_account_info(self, login):
         """Update account information in database"""
-        import MetaTrader5 as mt5
-        
-        if mt5.terminal_info() is None:
-            return
-        
-        account_info = mt5.account_info()
-        if account_info:
-            account = Account.query.filter_by(login=login).first()
-            if account:
-                account.balance = account_info.balance
-                account.equity = account_info.equity
-                account.margin = account_info.margin
-                account.margin_free = account_info.margin_free
-                account.currency = account_info.currency
-                account.updated_at = datetime.utcnow()
-                db.session.commit()
+        try:
+            import MetaTrader5 as mt5
+            
+            if mt5.terminal_info() is None:
+                return
+            
+            account_info = mt5.account_info()
+            if account_info:
+                account = Account.query.filter_by(login=login).first()
+                if account:
+                    account.balance = account_info.balance
+                    account.equity = account_info.equity
+                    account.margin = account_info.margin
+                    account.margin_free = account_info.margin_free
+                    account.currency = account_info.currency
+                    account.updated_at = datetime.utcnow()
+                    db.session.commit()
+        except ImportError:
+            # MetaTrader5 not available in development environment
+            logging.debug(f"MT5 not available, skipping account info update for {login}")
+            pass
     
     def stop(self):
         """Stop the trading engine"""
