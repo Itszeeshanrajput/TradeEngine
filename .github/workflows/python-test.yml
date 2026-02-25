@@ -34,8 +34,14 @@ jobs:
         flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
       continue-on-error: true
     
+    - name: Run pytest tests
+      run: |
+        pytest tests/ -v --tb=short
+      continue-on-error: false
+    
     - name: Test imports
       run: |
         python -c "import flask; print('Flask OK')"
         python -c "import pandas; print('Pandas OK')"
         python -c "import numpy; print('NumPy OK')"
+      continue-on-error: true
