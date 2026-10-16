@@ -5,7 +5,13 @@
       "login": 248388896,
       "password": "@Zeeshan786",
       "server": "Exness-MT5Trial",
-      "symbols": ["EURUSDm", "GBPUSDm", "XAUUSDm", "EURGBPm", "USDJPYm"],
+      "symbols": [
+        "EURUSDm",
+        "GBPUSDm",
+        "XAUUSDm",
+        "EURGBPm",
+        "USDJPYm"
+      ],
       "risk_percent": 2.0,
       "max_volume": 0.2,
       "strategy_name": "sma_rsi_combo",
@@ -21,7 +27,21 @@
       "login": 248388896,
       "password": "@Zeeshan786",
       "server": "Exness-MT5Trial",
-      "symbols": ["EURUSDm", "GBPUSDm", "XAUUSDm", "EURGBPm", "USDJPYm", "ADAUSDm", "BTCUSDm", "ETHUSDm", "SOLUSDm", "XRPUSDm", "LINKUSDm", "1INCHUSDm", "BNBUSDm"],
+      "symbols": [
+        "EURUSDm",
+        "GBPUSDm",
+        "XAUUSDm",
+        "EURGBPm",
+        "USDJPYm",
+        "ADAUSDm",
+        "BTCUSDm",
+        "ETHUSDm",
+        "SOLUSDm",
+        "XRPUSDm",
+        "LINKUSDm",
+        "1INCHUSDm",
+        "BNBUSDm"
+      ],
       "risk_percent": 1.0,
       "max_volume": 0.1,
       "strategy_name": "rsi_scalping",
@@ -41,7 +61,8 @@
     "enable_time_filter": false,
     "max_spread_multiplier": 2.0,
     "enable_news_filter": false,
-    "log_level": "INFO"
+    "log_level": "INFO",
+    "prop_firm_mode": false
   },
   "notification_settings": {
     "email_enabled": true,
@@ -55,6 +76,12 @@
     "enable_breakeven": true,
     "max_daily_trades": 10,
     "correlation_limit": 0.7,
-    "enable_kelly_sizing": false
+    "enable_kelly_sizing": false,
+    "prop_firm_settings": {
+      "daily_drawdown_limit_pct": 5.0,
+      "max_total_drawdown_pct": 10.0,
+      "weekend_trading_allowed": false,
+      "news_trading_allowed": false
+    }
   }
 }

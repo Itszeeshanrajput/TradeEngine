@@ -11,3 +11,4 @@ requests>=2.32.4
 sqlalchemy>=2.0.43
 werkzeug>=3.1.3
 MetaTrader5>=5.0.45
+pytz>=2023.3

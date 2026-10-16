@@ -351,3 +351,87 @@ def api_today_stats():
     except Exception as e:
         logging.error(f"Error getting today's stats: {e}")
         return jsonify({'error': str(e)}), 500
+
+@app.route('/api/analytics/heatmap')
+def analytics_heatmap():
+    """Return 30-day P&L heatmap data"""
+    try:
+        # Get trades from the last 30 days
+        thirty_days_ago = datetime.utcnow() - timedelta(days=30)
+        recent_trades = Trade.query.filter(Trade.close_time >= thirty_days_ago, Trade.status == 'CLOSED').all()
+
+        # Aggregate by day
+        daily_pnl = {}
+        for i in range(30):
+            day = (datetime.utcnow() - timedelta(days=i)).strftime('%Y-%m-%d')
+            daily_pnl[day] = 0.0
+
+        for trade in recent_trades:
+            day = trade.close_time.strftime('%Y-%m-%d')
+            if day in daily_pnl:
+                daily_pnl[day] += trade.profit
+
+        # Format for frontend
+        heatmap_data = []
+        for i in range(30):
+            day = (datetime.utcnow() - timedelta(days=29-i)).strftime('%Y-%m-%d')
+            heatmap_data.append({
+                'date': day,
+                'profit': daily_pnl[day]
+            })
+
+        return jsonify(heatmap_data)
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+
+@app.route('/api/prop_firm_status')
+def prop_firm_status():
+    """Return prop firm compliance data for the dashboard"""
+    try:
+        # Get primary account info
+        account = Account.query.first()
+        if not account:
+            return jsonify({'enabled': False})
+
+        with open('config.json', 'r') as f:
+            config = json.load(f)
+
+        prop_firm_mode = config.get('global_settings', {}).get('prop_firm_mode', False)
+        settings = config.get('risk_management', {}).get('prop_firm_settings', {})
+
+        if not prop_firm_mode:
+            return jsonify({'enabled': False})
+
+        # We need to approximate initial balance or get it from first recorded balance
+        # For this demo, let's assume the current balance is close to initial if no history
+        # A real implementation would store initial_balance in the DB
+        initial_balance = account.balance if account.balance > 0 else 10000.0
+
+        # Calculate drawdowns
+        daily_limit = settings.get('daily_drawdown_limit_pct', 5.0)
+        max_limit = settings.get('max_total_drawdown_pct', 10.0)
+
+        # Get start of day equity
+        # (Mocking start_of_day_balance as current balance for real-time visualization purposes,
+        # normally you'd query the DB for the balance at 00:00)
+        start_of_day_balance = initial_balance
+
+        current_daily_dd = 0.0
+        if account.equity < start_of_day_balance:
+            current_daily_dd = ((start_of_day_balance - account.equity) / start_of_day_balance) * 100
+
+        current_max_dd = 0.0
+        if account.equity < initial_balance:
+            current_max_dd = ((initial_balance - account.equity) / initial_balance) * 100
+
+        return jsonify({
+            'enabled': True,
+            'daily_limit': daily_limit,
+            'max_limit': max_limit,
+            'current_daily_dd': max(0, current_daily_dd),
+            'current_max_dd': max(0, current_max_dd),
+            'weekend_trading': settings.get('weekend_trading_allowed', False)
+        })
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500

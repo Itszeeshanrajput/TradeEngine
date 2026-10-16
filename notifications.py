@@ -14,6 +14,23 @@ class NotificationManager:
     def __init__(self):
         self.email_enabled = self._check_email_config()
         self.sms_enabled = self._check_sms_config()
+        self.telegram_enabled = self._check_telegram_config()
+
+    def _check_telegram_config(self):
+        return bool(os.getenv('TELEGRAM_BOT_TOKEN') and os.getenv('TELEGRAM_CHAT_ID'))
+
+    def _send_telegram(self, message):
+        if not self.telegram_enabled: return
+        token = os.getenv('TELEGRAM_BOT_TOKEN')
+        chat_id = os.getenv('TELEGRAM_CHAT_ID')
+        url = f"https://api.telegram.org/bot{token}/sendMessage"
+        payload = {"chat_id": chat_id, "text": message, "parse_mode": "HTML"}
+        try:
+            requests.post(url, json=payload, timeout=5)
+            logging.info("Telegram notification sent")
+        except Exception as e:
+            logging.error(f"Failed to send Telegram notification: {e}")
+
     
     def _check_email_config(self):
         """Check if email configuration is available"""
@@ -94,12 +111,15 @@ class NotificationManager:
         self._send_notifications(subject, message)
     
     def _send_notifications(self, subject, message):
-        """Send both email and SMS notifications"""
+        """Send both email, SMS, and Telegram notifications"""
         if self.email_enabled:
             self._send_email(subject, message)
         
         if self.sms_enabled:
             self._send_sms(f"{subject}: {message[:100]}...")
+
+        if self.telegram_enabled:
+            self._send_telegram(f"<b>{subject}</b>\n<pre>{message}</pre>")
     
     def _send_email(self, subject, message):
         """Send email notification"""

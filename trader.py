@@ -10,6 +10,7 @@ import strategy
 import risk_manager
 from notifications import NotificationManager
 
+from prop_firm_manager import PropFirmManager
 class Trader:
     def __init__(self, account_config, global_settings):
         self.config = account_config
@@ -24,6 +25,17 @@ class Trader:
         self.daily_loss_limit = self.config.get('daily_loss_limit', 5.0)  # Percentage
         self.enable_news_filter = self.config.get('enable_news_filter', False)
         
+        # Prop firm
+        self.prop_firm_manager = PropFirmManager({
+            'prop_firm_mode': self.globals.get('prop_firm_mode', False),
+            'prop_firm_settings': self.globals.get('prop_firm_settings', {}) # fallback if not in risk_management
+        })
+        if 'risk_management' in self.globals and 'prop_firm_settings' in self.globals['risk_management']:
+            self.prop_firm_manager = PropFirmManager({
+                'prop_firm_mode': self.globals.get('prop_firm_mode', False),
+                'prop_firm_settings': self.globals['risk_management']['prop_firm_settings']
+            })
+
     def _get_control_status(self):
         """Check control status with enhanced error handling"""
         try:
@@ -196,9 +208,29 @@ class Trader:
         logging.info(f"--- Starting session for account: {self.name} ---")
         
         try:
-            # Initialize MT5 connection
+        # Initialize MT5 connection
             mt5_helper.initialize_mt5(self.config['login'], self.config['password'], self.config['server'])
             
+            # Prop firm checks
+            account_info = mt5.account_info()
+            if account_info:
+                # In a real system, initial_balance is fetched from DB.
+                # We will use config or fallback to 10k for this robust demo.
+                initial_balance = self.config.get('initial_balance', 10000.0)
+                allowed, reason = self.prop_firm_manager.check_trading_allowed(
+                    account_balance=account_info.balance,
+                    account_equity=account_info.equity,
+                    initial_balance=initial_balance
+                )
+                if not allowed:
+                    logging.warning(f"[{self.name}] Prop Firm Rules blocked trading: {reason}")
+                    self.notification_manager.send_error_notification(f"Prop Firm Rules blocked trading for {self.name}: {reason}")
+                    self._update_dashboard_data()
+                    self._manage_existing_positions_only()
+                    mt5_helper.shutdown_mt5()
+                    return
+
+
         except RuntimeError as e:
             logging.error(f"[{self.name}] MT5 initialization failed: {e}")
             self.notification_manager.send_error_notification(

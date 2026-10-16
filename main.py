@@ -2,6 +2,9 @@ import threading
 import time
 import logging
 from app import app, socketio
+import models
+import routes
+import websocket_handler
 from trading_engine import TradingEngine
 
 def start_trading_engine():

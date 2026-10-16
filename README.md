@@ -20,15 +20,24 @@
 
 ## 📸 Features Showcase
 
+### 🔥 NEW: Prop Firm Risk Management Mode
+Easily pass challenges like FTMO, MyForexFunds, etc., with built-in strict risk management:
+- **Daily Drawdown Limits:** Automatically stops trading if the daily loss limit is reached.
+- **Max Total Drawdown:** Prevents catastrophic losses by halting bot completely if max drawdown hits.
+- **Weekend/News Protection:** Disables trading during weekends and high-impact news.
+
+### 📱 Telegram & Discord Notifications
+Get real-time updates directly to your phone. Includes:
+- Trade Opens / Closes
+- Take Profit / Stop Loss hits
+- Daily Summary & Profit/Loss reports
+
 ### 🎯 Core Capabilities
-- **Real-time Web Dashboard** - Beautiful Flask UI with live trading metrics
+- **Real-time Web Dashboard** - Beautiful UI with **30-Day P&L Heatmap** (Like GitHub contributions but for money!)
 - **Multi-Account Management** - Manage multiple MT5 accounts simultaneously
 - **Automated Trading Engine** - Execute strategies 24/5 without manual intervention
-- **Risk Management** - Position sizing, stop-loss, take-profit automation
+- **Crypto & Forex Support** - Trade Major pairs, Gold, and Crypto (BTC/ETH) seamlessly.
 - **Backtesting Suite** - Test strategies on historical data before live trading
-- **Strategy Engine** - SMA Crossover, RSI Scalping, Hybrid strategies built-in
-- **WebSocket Integration** - Real-time updates & notifications
-- **Email/SMS Alerts** - Get notified on trade events instantly
 
 ### 🛡️ Safety & Security
 - ✅ Demo mode for safe testing

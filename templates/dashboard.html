@@ -12,7 +12,59 @@
     </div>
 </div>
 
+
+<!-- Prop Firm Status Widget & P&L Heatmap -->
+<div class="row mb-4">
+    <div class="col-md-4">
+        <div class="card h-100 border-primary">
+            <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+                <span><i class="fas fa-shield-alt me-2"></i>Prop Firm Compliance</span>
+                <span class="badge bg-success">ACTIVE</span>
+            </div>
+            <div class="card-body">
+                <div class="mb-3">
+                    <div class="d-flex justify-content-between mb-1">
+                        <span>Daily Drawdown Limit</span>
+                        <span class="text-success" id="dailyDrawdownStatus">Loading...</span>
+                    </div>
+                    <div class="progress" style="height: 10px;">
+                        <div id="dailyDrawdownBar" class="progress-bar bg-success" role="progressbar" style="width: 0%"></div>
+                    </div>
+                </div>
+                <div>
+                    <div class="d-flex justify-content-between mb-1">
+                        <span>Max Total Drawdown</span>
+                        <span class="text-success" id="maxDrawdownStatus">Loading...</span>
+                    </div>
+                    <div class="progress" style="height: 10px;">
+                        <div id="maxDrawdownBar" class="progress-bar bg-success" role="progressbar" style="width: 0%"></div>
+                    </div>
+                </div>
+                <div class="mt-3 text-center">
+                    <small class="text-muted" id="weekendTradingStatus"><i class="fas fa-spinner fa-spin me-1"></i> Checking rules...</small>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-8">
+        <div class="card h-100">
+            <div class="card-header">
+                <i class="fas fa-calendar-alt me-2"></i>30-Day P&L Heatmap
+            </div>
+            <div class="card-body d-flex align-items-center justify-content-center">
+                <div class="text-center w-100">
+                    <div class="d-flex flex-wrap gap-1 justify-content-center mb-2" id="heatmapContainer">
+                        <!-- Heatmap boxes generated via JS -->
+                    </div>
+                    <small class="text-muted">Daily Profit/Loss Performance</small>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
 <!-- Account Summary Cards -->
+
 <div class="row mb-4" id="accountSummary">
     <div class="col-md-3 mb-3">
         <div class="card">
@@ -452,5 +504,77 @@ function showLiveActivity(message, type = 'info') {
         }
     }, 5000);
 }
+</script>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+
+    // Fetch Prop Firm Data
+    function loadPropFirmStatus() {
+        fetch('/api/prop_firm_status')
+            .then(res => res.json())
+            .then(data => {
+                if(data.error || !data.enabled) return;
+
+                // Daily
+                document.getElementById('dailyDrawdownStatus').innerText = data.current_daily_dd.toFixed(2) + '% / ' + data.daily_limit.toFixed(2) + '%';
+                let dailyPct = (data.current_daily_dd / data.daily_limit) * 100;
+                let dailyBar = document.getElementById('dailyDrawdownBar');
+                dailyBar.style.width = Math.min(100, dailyPct) + '%';
+                if(dailyPct > 80) dailyBar.className = 'progress-bar bg-danger';
+                else if(dailyPct > 50) dailyBar.className = 'progress-bar bg-warning';
+                else dailyBar.className = 'progress-bar bg-success';
+
+                // Max
+                document.getElementById('maxDrawdownStatus').innerText = data.current_max_dd.toFixed(2) + '% / ' + data.max_limit.toFixed(2) + '%';
+                let maxPct = (data.current_max_dd / data.max_limit) * 100;
+                let maxBar = document.getElementById('maxDrawdownBar');
+                maxBar.style.width = Math.min(100, maxPct) + '%';
+                if(maxPct > 80) maxBar.className = 'progress-bar bg-danger';
+                else if(maxPct > 50) maxBar.className = 'progress-bar bg-warning';
+                else maxBar.className = 'progress-bar bg-success';
+
+                // Weekend
+                let weekendIcon = data.weekend_trading ? '<i class="fas fa-check-circle text-success me-1"></i> Weekend Trading: Allowed' : '<i class="fas fa-times-circle text-danger me-1"></i> Weekend Trading: Disabled';
+                document.getElementById('weekendTradingStatus').innerHTML = weekendIcon;
+            });
+    }
+    loadPropFirmStatus();
+    setInterval(loadPropFirmStatus, 10000);
+
+        const container = document.getElementById("heatmapContainer");
+        if (container) {
+            fetch('/api/analytics/heatmap')
+                .then(response => response.json())
+                .then(data => {
+                    if (data.error) {
+                        console.error("Error fetching heatmap data:", data.error);
+                        return;
+                    }
+                    data.forEach(day => {
+                        const box = document.createElement("div");
+                        box.style.width = "25px";
+                        box.style.height = "25px";
+                        box.style.borderRadius = "4px";
+                        box.style.cursor = "pointer";
+
+                        if (day.profit > 0) {
+                            if (day.profit > 50) box.style.backgroundColor = "#198754";
+                            else if (day.profit > 20) box.style.backgroundColor = "#20c997";
+                            else box.style.backgroundColor = "#d1e7dd";
+                        } else if (day.profit < 0) {
+                            if (day.profit < -50) box.style.backgroundColor = "#dc3545";
+                            else box.style.backgroundColor = "#f8d7da";
+                        } else {
+                            box.style.backgroundColor = "#e9ecef"; // neutral gray for $0 or no trades
+                        }
+
+                        box.title = day.date + ": $" + day.profit.toFixed(2);
+                        container.appendChild(box);
+                    });
+                })
+                .catch(error => console.error("Error fetching heatmap:", error));
+        }
+    });
 </script>
 {% endblock %}
