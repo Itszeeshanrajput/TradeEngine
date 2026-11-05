@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="en" data-bs-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>TradeEngine — Live Interactive Dashboard Simulation</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    body { background-color: #0d1117; color: #c9d1d9; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; }
+    .card { background-color: #161b22; border: 1px solid #30363d; border-radius: 8px; }
+    .badge-live { background-color: #238636; color: #fff; font-size: 0.75rem; padding: 4px 8px; border-radius: 4px; }
+    .table { color: #c9d1d9; margin-bottom: 0; }
+    .table th { border-color: #30363d; color: #8b949e; font-size: 0.8rem; text-transform: uppercase; }
+    .table td { border-color: #21262d; font-size: 0.85rem; }
+    .text-profit { color: #3fb950 !important; font-weight: 600; }
+    .text-loss { color: #f85149 !important; font-weight: 600; }
+  </style>
+</head>
+<body class="py-4">
+
+<div class="container-fluid px-4">
+  <!-- Top Bar -->
+  <div class="d-flex justify-content-between align-items-center mb-4 pb-3 border-bottom border-secondary">
+    <div>
+      <h3 class="mb-0 text-white fw-bold"><i class="fa-solid fa-chart-line text-info me-2"></i>TradeEngine Orchestrator</h3>
+      <p class="text-secondary small mb-0">Automated MetaTrader 5 Telemetry & Quantitative Execution Simulation</p>
+    </div>
+    <div>
+      <span class="badge-live me-3"><i class="fa-solid fa-circle-dot me-1"></i>SIMULATION ACTIVE</span>
+      <a href="https://github.com/Itszeeshanrajput/TradeEngine" class="btn btn-outline-info btn-sm">
+        <i class="fa-brands fa-github me-1"></i>View on GitHub
+      </a>
+    </div>
+  </div>
+
+  <!-- Metric Cards -->
+  <div class="row g-3 mb-4">
+    <div class="col-md-3">
+      <div class="card p-3">
+        <span class="text-secondary small">Account Balance</span>
+        <h4 class="text-white fw-bold mt-1" id="balance">$10,482.50</h4>
+        <span class="text-profit small"><i class="fa-solid fa-arrow-trend-up me-1"></i>+4.82% Realized</span>
+      </div>
+    </div>
+    <div class="col-md-3">
+      <div class="card p-3">
+        <span class="text-secondary small">Floating Equity</span>
+        <h4 class="text-white fw-bold mt-1" id="equity">$10,614.20</h4>
+        <span class="text-profit small" id="floatingPnl">+$131.70 Floating</span>
+      </div>
+    </div>
+    <div class="col-md-3">
+      <div class="card p-3">
+        <span class="text-secondary small">Active Strategy</span>
+        <h4 class="text-info fw-bold mt-1">SMA + RSI Dynamic</h4>
+        <span class="text-secondary small">Timeframe: M5 • Risk: 1.5%</span>
+      </div>
+    </div>
+    <div class="col-md-3">
+      <div class="card p-3">
+        <span class="text-secondary small">Latency Telemetry</span>
+        <h4 class="text-white fw-bold mt-1" id="latency">1.18 ms</h4>
+        <span class="text-secondary small">IPC Bridge: MT5 Windows Server</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Chart & Tickers -->
+  <div class="row g-3 mb-4">
+    <div class="col-lg-8">
+      <div class="card p-3 h-100">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+          <h6 class="text-white fw-bold mb-0">Real-Time Equity Telemetry Curve</h6>
+          <span class="text-secondary small">Streaming simulated tick history</span>
+        </div>
+        <div style="height: 280px;">
+          <canvas id="equityChart"></canvas>
+        </div>
+      </div>
+    </div>
+    <div class="col-lg-4">
+      <div class="card p-3 h-100">
+        <h6 class="text-white fw-bold mb-3">Live Currency Pairs</h6>
+        <div class="list-group list-group-flush bg-transparent">
+          <div class="list-group-item bg-transparent d-flex justify-content-between border-secondary px-0">
+            <span><b>EUR/USD</b></span>
+            <span class="text-profit fw-bold" id="eurusd">1.08452</span>
+          </div>
+          <div class="list-group-item bg-transparent d-flex justify-content-between border-secondary px-0">
+            <span><b>GBP/USD</b></span>
+            <span class="text-profit fw-bold" id="gbpusd">1.29184</span>
+          </div>
+          <div class="list-group-item bg-transparent d-flex justify-content-between border-secondary px-0">
+            <span><b>USD/JPY</b></span>
+            <span class="text-loss fw-bold" id="usdjpy">153.240</span>
+          </div>
+          <div class="list-group-item bg-transparent d-flex justify-content-between border-secondary px-0">
+            <span><b>XAU/USD (Gold)</b></span>
+            <span class="text-profit fw-bold" id="xauusd">2745.80</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Positions & Logs Table -->
+  <div class="card p-3">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+      <h6 class="text-white fw-bold mb-0">Live Active Positions</h6>
+      <span class="badge bg-secondary">3 Active Trades</span>
+    </div>
+    <div class="table-responsive">
+      <table class="table align-middle">
+        <thead>
+          <tr>
+            <th>Ticket</th>
+            <th>Symbol</th>
+            <th>Type</th>
+            <th>Volume</th>
+            <th>Open Price</th>
+            <th>Current</th>
+            <th>SL / TP</th>
+            <th>Profit</th>
+          </tr>
+        </thead>
+        <tbody id="positionsTable">
+          <tr>
+            <td>#982141</td>
+            <td><b>EURUSD</b></td>
+            <td><span class="badge bg-success">BUY</span></td>
+            <td>0.50</td>
+            <td>1.08380</td>
+            <td>1.08452</td>
+            <td>1.08200 / 1.08750</td>
+            <td class="text-profit">+$72.00</td>
+          </tr>
+          <tr>
+            <td>#982146</td>
+            <td><b>GBPUSD</b></td>
+            <td><span class="badge bg-success">BUY</span></td>
+            <td>0.30</td>
+            <td>1.29050</td>
+            <td>1.29184</td>
+            <td>1.28800 / 1.29500</td>
+            <td class="text-profit">+$40.20</td>
+          </tr>
+          <tr>
+            <td>#982150</td>
+            <td><b>USDJPY</b></td>
+            <td><span class="badge bg-danger">SELL</span></td>
+            <td>0.40</td>
+            <td>153.320</td>
+            <td>153.240</td>
+            <td>153.550 / 152.900</td>
+            <td class="text-profit">+$19.50</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="text-center mt-4 text-secondary small">
+    Developed by <b>Zeeshan Rajput (404innovator)</b> • Full Source Code available on <a href="https://github.com/Itszeeshanrajput/TradeEngine" class="text-info text-decoration-none">GitHub</a>
+  </div>
+</div>
+
+<script>
+  // Real-time Chart Initialization
+  const ctx = document.getElementById('equityChart').getContext('2d');
+  const labels = ['10:00', '10:05', '10:10', '10:15', '10:20', '10:25', '10:30', '10:35', '10:40', '10:45'];
+  const dataPoints = [10000, 10080, 10050, 10140, 10220, 10200, 10350, 10420, 10480, 10614];
+
+  const chart = new Chart(ctx, {
+    type: 'line',
+    data: {
+      labels: labels,
+      datasets: [{
+        label: 'Equity ($)',
+        data: dataPoints,
+        borderColor: '#00D9FF',
+        backgroundColor: 'rgba(0, 217, 255, 0.08)',
+        fill: true,
+        tension: 0.35,
+        borderWidth: 2,
+        pointRadius: 3
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: { legend: { display: false } },
+      scales: {
+        x: { grid: { color: '#21262d' }, ticks: { color: '#8b949e' } },
+        y: { grid: { color: '#21262d' }, ticks: { color: '#8b949e' } }
+      }
+    }
+  });
+
+  // Simulated Tick Updater
+  setInterval(() => {
+    const delta = (Math.random() - 0.48) * 6;
+    const lastEquity = chart.data.datasets[0].data.slice(-1)[0];
+    const newEquity = +(lastEquity + delta).toFixed(2);
+    chart.data.labels.shift();
+    const now = new Date();
+    chart.data.labels.push(now.getHours() + ':' + ('0' + now.getMinutes()).slice(-2) + ':' + ('0' + now.getSeconds()).slice(-2));
+    chart.data.datasets[0].data.shift();
+    chart.data.datasets[0].data.push(newEquity);
+    chart.update('none');
+
+    document.getElementById('equity').innerText = '$' + newEquity.toLocaleString('en-US', {minimumFractionDigits: 2});
+    const pnl = +(newEquity - 10482.50).toFixed(2);
+    document.getElementById('floatingPnl').innerText = (pnl >= 0 ? '+' : '') + '$' + pnl + ' Floating';
+    document.getElementById('latency').innerText = (1.10 + Math.random() * 0.18).toFixed(2) + ' ms';
+  }, 2000);
+</script>
+</body>
+</html>

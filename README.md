@@ -12,7 +12,7 @@
 
 **#ForexTrading #AutomatedTrading #TradingBot #Flask #MetaTrader5**
 
-[Quick Start](#-quick-start) • [Features](#-features) • [Installation](#-installation) • [Documentation](#-documentation) • [Support](#-support)
+[🌐 Live Web Demo](https://itszeeshanrajput.github.io/TradeEngine/) • [Quick Start](#-quick-start) • [Features](#-features) • [Installation](#-installation) • [Documentation](#-documentation) • [Support](#-support)
 
 </div>
 
